@@ -1,0 +1,219 @@
+---
+---
+
+/* Fonts */
+
+@font-face {
+    font-family: EquityA;
+    src: url("fonts/equity_ot_a_regular.woff2");
+}
+
+@font-face {
+    font-family: EquityA;
+    font-weight: bold;
+    src: url("fonts/equity_ot_a_bold.woff2");
+}
+
+@font-face {
+    font-family: EquityA;
+    font-style: italic;
+    src: url("fonts/equity_ot_a_italic.woff2");
+}
+
+@font-face {
+    font-family: EquityA;
+    font-weight: bold;
+    font-style: italic;
+    src: url("fonts/equity_ot_a_bold_italic.woff2");
+}
+
+@font-face {
+    font-family: Concourse;
+    font-weight: 300;
+    src: url("fonts/concourse_ot_3_book.woff2");
+}
+
+@font-face {
+    font-family: Concourse;
+    font-weight: 300;
+    font-style: italic;
+    src: url("fonts/concourse_ot_3_book.woff2");
+}
+
+@font-face {
+    font-family: Concourse;
+    font-weight: 400;
+    src: url("fonts/concourse_ot_4_medium.woff2");
+}
+
+@font-face {
+    font-family: Concourse;
+    font-weight: 400;
+    font-style: italic;
+    src: url("fonts/concourse_ot_4_medium.woff2");
+}
+
+@font-face {
+    font-family: Concourse;
+    font-weight: 600;
+    src: url("fonts/concourse_ot_6_semibold.woff2");
+}
+
+@font-face {
+    font-family: Concourse;
+    font-weight: 600;
+    font-style: italic;
+    src: url("fonts/concourse_ot_6_semibold_italic.woff2");
+}
+
+/* Variables and functions */
+
+$serif-font: EquityA, TimesNewRoman, Times New Roman, Times, Baskerville, Georgia, serif;
+$sans-serif-font: Concourse, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;
+$body-text-size: 23px;
+$body-line-spacing: 1.45;
+$bg-color: #FFFFFF;
+$text-color: #000000;
+$accent-color: #E34234;
+
+@mixin hyphenate {
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+}
+
+@mixin small-caps {
+    text-transform: lowercase;
+    /* True for Equity and Concourse only */
+    font-feature-settings: "ss10";
+}
+
+/* */
+
+body {
+    font-family: $serif-font;
+    font-size: $body-text-size;
+    color: $text-color;
+    background-color: $bg-color;
+    line-height: $body-line-spacing;
+    max-width: 650px;
+    margin: 50px auto 220px auto;
+    font-feature-settings: "liga";
+    // @include hyphenate;
+}
+
+p {
+    margin-top: 0;
+}
+
+h1.page-title {
+    font-family: $sans-serif-font;
+    font-weight: 400;
+    // font-size: 48px;
+    // font-weight: 400;
+    // text-align: center;
+    // @include small-caps;
+    // margin: 0;
+    font-size: 36px;
+}
+
+h2, h3 {
+    font-size: $body-text-size;
+    font-weight: bold;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    @include small-caps;
+}
+
+/* Site header */
+
+h1.site-title {
+    font-family: $sans-serif-font;
+    font-size: 48px;
+    font-weight: 300;
+    text-align: center;
+    @include small-caps;
+    margin: 0;
+}
+
+$nav-padding: 33px;
+nav {
+    margin-top: 0;
+    font-family: $sans-serif-font;
+    font-size: 29px;
+    font-weight: 300;
+    text-align: center;
+    @include small-caps;
+
+    a {
+        padding-left: $nav-padding;
+        padding-right: $nav-padding;
+    }
+}
+
+/* Links */
+
+a {
+    color: $accent-color;
+    text-decoration: none;
+    transition: opacity 0.1s;
+}
+
+a:hover {
+    opacity: 0.5;
+}
+
+a.section {
+    @include small-caps;
+    font-family: $sans-serif-font;
+}
+
+
+/* Tables */
+
+table {
+    margin: auto;
+    width: 70%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+$cell-padding: 28px;
+td, th {
+    // padding-left: $cell-padding;
+    // padding-right: $cell-padding;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    // padding: 0 $cell-padding 0 $cell-padding;
+}
+
+th {
+    font-weight: inherit;
+    @include small-caps;
+    font-family: $sans-serif-font;
+    // font-size: 105%;
+}
+
+/* Lists */
+
+li {
+    margin-bottom: 5px;
+}
+
+/* Misc */
+
+sig {
+    font-family: $sans-serif-font;
+    font-size: 105%;
+    @include small-caps;
+    text-align: right;
+    display: block;
+
+
+}
+
+sig::before { content: "—" }
+
+colored {
+    color: $accent-color;
+}

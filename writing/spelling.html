@@ -1,0 +1,375 @@
+---
+title: A realistic proposal for English spelling reform
+layout: default
+---
+
+<p>The idea is to take the phonemic British RP pronunciations from the Oxford English Dictionary and translate the IPA symbols into something more natural, ignoring things like stress and aspiration and attempting to preserve the look and feel of written English.</p>
+
+<script>
+const button = document.getElementById("north-wind-button");
+button.addEventListener("click", () => {
+    const normal = document.getElementById("north-wind");
+    const trans = document.getElementById("north-wind-trans");
+    if (normal.getAttribute("hidden") === "") {
+        normal.removeAttribute("hidden", "");
+        trans.setAttribute("hidden", "");
+    } else {
+        normal.setAttribute("hidden", "");
+        trans.removeAttribute("hidden", "");
+    }
+});
+</script>
+
+<h2>Spelling rules</h2>
+<p>The vowels are as follows. (The use of w to denote the vowels in &ldquo;foot&rdquo; and &ldquo;goose&rdquo; is taken from Welsh.)</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Letter</th>
+<th style="text-align:center">Sound</th>
+<th style="text-align:center">IPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Aa</td>
+<td style="text-align:center"><colored>a</colored>nt</td>
+<td style="text-align:center">/a/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ââ</td>
+<td style="text-align:center">b<colored>ar</colored>n</td>
+<td style="text-align:center">/ɑː/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ee</td>
+<td style="text-align:center">b<colored>e</colored>ll</td>
+<td style="text-align:center">/ɛ/</td>
+</tr>
+<tr>
+<td style="text-align:center">Éé</td>
+<td style="text-align:center">squ<colored>are</colored></td>
+<td style="text-align:center">/ɛː/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ii</td>
+<td style="text-align:center">k<colored>i</colored>t, hon<colored>e</colored>st</td>
+<td style="text-align:center">/ɪ/, /ᵻ/</td>
+</tr>
+<tr>
+<td style="text-align:center">Oo</td>
+<td style="text-align:center">l<colored>o</colored>t</td>
+<td style="text-align:center">/ɒ/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ôô</td>
+<td style="text-align:center">h<colored>aw</colored>k</td>
+<td style="text-align:center">/ɔː/</td>
+</tr>
+<tr>
+<td style="text-align:center">Uu</td>
+<td style="text-align:center">alph<colored>a</colored></td>
+<td style="text-align:center">/ə/</td>
+</tr>
+<tr>
+<td style="text-align:center">Úú</td>
+<td style="text-align:center">n<colored>ur</colored>se</td>
+<td style="text-align:center">/əː/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ûû</td>
+<td style="text-align:center">c<colored>u</colored>p</td>
+<td style="text-align:center">/ʌ/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ww</td>
+<td style="text-align:center">f<colored>oo</colored>t, J<colored>u</colored>ly</td>
+<td style="text-align:center">/ʊ/, /ᵿ/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ẃẃ</td>
+<td style="text-align:center">g<colored>oo</colored>se</td>
+<td style="text-align:center">/uː/</td>
+</tr>
+<tr>
+<td style="text-align:center">Yy</td>
+<td style="text-align:center">happ<colored>y</colored></td>
+<td style="text-align:center">/i/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ýý</td>
+<td style="text-align:center">fl<colored>ee</colored>ce</td>
+<td style="text-align:center">/iː/</td>
+</tr>
+</tbody>
+</table>
+<p>For the purposes of collation, vowels with a circumflex (â, ô, û) are considered separate vowels, while vowels with an acute accent (é, ú, ẃ, ý) are not as they are considered long versions of the corresponding unaccented vowel.</p>
+
+<p>There are seven double vowels or diphthongs, written as follows. Some of the vowels or diphthongs may sound slightly different depending on your dialect. (I speak a dialect with no distinction between <colored>û</colored>/<colored>w</colored> and in which <colored>wu</colored> simply sounds like <colored>ô</colored>.)</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Letters</th>
+<th style="text-align:center">Sound</th>
+<th style="text-align:center">IPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">ei</td>
+<td style="text-align:center">d<colored>ay</colored></td>
+<td style="text-align:center">/eɪ/</td>
+</tr>
+<tr>
+<td style="text-align:center">ûi</td>
+<td style="text-align:center">p<colored>i</colored>n<colored>e</colored></td>
+<td style="text-align:center">/ʌɪ/</td>
+</tr>
+<tr>
+<td style="text-align:center">aw</td>
+<td style="text-align:center">m<colored>ou</colored>th</td>
+<td style="text-align:center">/aʊ/</td>
+</tr>
+<tr>
+<td style="text-align:center">uw</td>
+<td style="text-align:center">g<colored>oa</colored>t</td>
+<td style="text-align:center">/əʊ/</td>
+</tr>
+<tr>
+<td style="text-align:center">ôi</td>
+<td style="text-align:center">ch<colored>oi</colored>ce</td>
+<td style="text-align:center">/ɔɪ/</td>
+</tr>
+<tr>
+<td style="text-align:center">iu</td>
+<td style="text-align:center">h<colored>ere</colored></td>
+<td style="text-align:center">/ɪə/</td>
+</tr>
+<tr>
+<td style="text-align:center">wu</td>
+<td style="text-align:center">c<colored>ure</colored></td>
+<td style="text-align:center">/ʊə/</td>
+</tr>
+</tbody>
+</table>
+<p>All single consonants are unchanged except for the removal of <colored>k</colored>, <colored>q</colored> and <colored>x</colored>. Every consonant has exactly one pronunciation: <colored>c</colored> is always hard as in <colored>c</colored>ap, never soft as in <colored>c</colored>ent.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Letter</th>
+<th style="text-align:center">Sound</th>
+<th style="text-align:center">IPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Bb</td>
+<td style="text-align:center"><colored>b</colored>ed</td>
+<td style="text-align:center">/b/</td>
+</tr>
+<tr>
+<td style="text-align:center">Cc</td>
+<td style="text-align:center"><colored>c</colored>ap</td>
+<td style="text-align:center">/k/</td>
+</tr>
+<tr>
+<td style="text-align:center">Dd</td>
+<td style="text-align:center"><colored>d</colored>uck</td>
+<td style="text-align:center">/d/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ff</td>
+<td style="text-align:center"><colored>f</colored>oil</td>
+<td style="text-align:center">/f/</td>
+</tr>
+<tr>
+<td style="text-align:center">Gg</td>
+<td style="text-align:center"><colored>g</colored>ain</td>
+<td style="text-align:center">/g/</td>
+</tr>
+<tr>
+<td style="text-align:center">Hh</td>
+<td style="text-align:center"><colored>h</colored>ouse</td>
+<td style="text-align:center">/h/</td>
+</tr>
+<tr>
+<td style="text-align:center">Jj</td>
+<td style="text-align:center"><colored>j</colored>oke</td>
+<td style="text-align:center">/dʒ/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ll</td>
+<td style="text-align:center"><colored>l</colored>imp</td>
+<td style="text-align:center">/l/</td>
+</tr>
+<tr>
+<td style="text-align:center">Mm</td>
+<td style="text-align:center"><colored>m</colored>aze</td>
+<td style="text-align:center">/m/</td>
+</tr>
+<tr>
+<td style="text-align:center">Nn</td>
+<td style="text-align:center"><colored>n</colored>ight</td>
+<td style="text-align:center">/n/</td>
+</tr>
+<tr>
+<td style="text-align:center">Pp</td>
+<td style="text-align:center"><colored>p</colored>ink</td>
+<td style="text-align:center">/p/</td>
+</tr>
+<tr>
+<td style="text-align:center">Rr</td>
+<td style="text-align:center"><colored>r</colored>ung</td>
+<td style="text-align:center">/r/</td>
+</tr>
+<tr>
+<td style="text-align:center">Ss</td>
+<td style="text-align:center"><colored>s</colored>ail</td>
+<td style="text-align:center">/s/</td>
+</tr>
+<tr>
+<td style="text-align:center">Tt</td>
+<td style="text-align:center"><colored>t</colored>in</td>
+<td style="text-align:center">/t/</td>
+</tr>
+<tr>
+<td style="text-align:center">Vv</td>
+<td style="text-align:center"><colored>v</colored>iew</td>
+<td style="text-align:center">/v/</td>
+</tr>
+<tr>
+<td style="text-align:center">Zz</td>
+<td style="text-align:center"><colored>z</colored>ero</td>
+<td style="text-align:center">/z/</td>
+</tr>
+</tbody>
+</table>
+There are eight digraphs as follows. Note that <colored>w</colored> and <colored>y</colored> denote vowels, and <colored>wh</colored> and <colored>yh</colored> denote consonants. Note also the distinction between <colored>th</colored> and <colored>dh</colored>.
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Letters</th>
+<th style="text-align:center">Sound</th>
+<th style="text-align:center">IPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">ch</td>
+<td style="text-align:center"><colored>ch</colored>alk</td>
+<td style="text-align:center">/tʃ/</td>
+</tr>
+<tr>
+<td style="text-align:center">dh</td>
+<td style="text-align:center"><colored>th</colored>is</td>
+<td style="text-align:center">/ð/</td>
+</tr>
+<tr>
+<td style="text-align:center">ng</td>
+<td style="text-align:center">ki<colored>ng</colored></td>
+<td style="text-align:center">/ŋ/</td>
+</tr>
+<tr>
+<td style="text-align:center">sh</td>
+<td style="text-align:center"><colored>sh</colored>ip</td>
+<td style="text-align:center">/ʃ/</td>
+</tr>
+<tr>
+<td style="text-align:center">th</td>
+<td style="text-align:center"><colored>th</colored>in</td>
+<td style="text-align:center">/θ/</td>
+</tr>
+<tr>
+<td style="text-align:center">wh</td>
+<td style="text-align:center"><colored>w</colored>alk</td>
+<td style="text-align:center">/w/</td>
+</tr>
+<tr>
+<td style="text-align:center">yh</td>
+<td style="text-align:center"><colored>y</colored>es</td>
+<td style="text-align:center">/j/</td>
+</tr>
+<tr>
+<td style="text-align:center">zh</td>
+<td style="text-align:center">mea<colored>s</colored>ure</td>
+<td style="text-align:center">/ʒ/</td>
+</tr>
+</tbody>
+</table>
+<p>Apostrophes are used to separate letters in a digraph pronounced separately:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Standard</th>
+<th style="text-align:center">New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">boathouse</td>
+<td style="text-align:center">buwt&#8217;haus</td>
+</tr>
+<tr>
+<td style="text-align:center">cowherd</td>
+<td style="text-align:center">caw&#8217;húd</td>
+</tr>
+<tr>
+<td style="text-align:center">mishap</td>
+<td style="text-align:center">mis&#8217;hap</td>
+</tr>
+<tr>
+<td style="text-align:center">pawing</td>
+<td style="text-align:center">pô&#8217;ing</td>
+</tr>
+</tbody>
+</table>
+
+<p>Syllabic consonants are written with a <colored>u</colored> before the consonant:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Standard</th>
+<th style="text-align:center">New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">mansion</td>
+<td style="text-align:center">manshun</td>
+</tr>
+<tr>
+<td style="text-align:center">dazzle</td>
+<td style="text-align:center">dazul</td>
+</tr>
+<tr>
+<td style="text-align:center">chasm</td>
+<td style="text-align:center">cazum</td>
+</tr>
+</tbody>
+</table>
+
+Lastly:
+
+<ul>
+<li>The word &ldquo;the&rdquo; is written &ldquo;dhu&rdquo; before consonants and &ldquo;dhy&rdquo; before vowels, reflecting the pronunciation.
+</li>
+<li>Existing spelling conventions such as capitalised &ldquo;I&rdquo;, possessive &ldquo;&#8217;s&rdquo;, and apostrophes in contractions such as &ldquo;I&#8217;ve&rdquo; and &ldquo;she&#8217;d&rdquo; are ignored.</li>
+<li>Rules behind capitalisation and other punctuation (including hyphens) remain unchanged.</li>
+</ul>
+<h2>Examples</h2>
+
+<p>This section is unfinished.</p>
+
+<blockquote>
+<h3>The North Wind and the Sun</h3>
+<p>The North Wind and the Sun were disputing which was the stronger, when a traveler came along wrapped in a warm cloak. They agreed that the one who first succeeded in making the traveler take his cloak off should be considered stronger than the other. Then the North Wind blew as hard as he could, but the more he blew the more closely did the traveler fold his cloak around him; and at last the North Wind gave up the attempt. Then the Sun shined out warmly, and immediately the traveler took off his cloak. And so the North Wind was obliged to confess that the Sun was the stronger of the two.</p>
+</blockquote>
+<h3>Dhu Nôth Whind and dhu Sûn</h3>
+<p>Dhu Nôth Whind and dhu Sûn whú dispyhẃting which whoz dhu strongu, when u travulu ceim ulong rapt in u wôm cluwc. Dhei ugrýd dhat dhu whon hẃ fúst sucsýdid in meicing dhu travulu teic hiz cluwc of shud bý considud strongu dhan dhý ûdhu. Dhen dhu Nôth Whind blẃ az hâd az hý cwd, but dhu mô hý blẃ dhu mô cluwsly did dhu travulu fuwld hiz cluwc arawnd him; and at lâst dhu Nôth Whind geiv ûp dhy atempt. Dhen dhu Sûn shûind awt whômly, and imýdiutly dhu travulu twc of hiz cluwc. And suw dhu Nôth Whind whoz ublûijd tw confes dhat dhu Sûn whoz dhu strongu ov dhu tẃ.</p>
+
+<h2>Practical usage</h2>
+<p>No new glyphs are introduced. The accented characters required are <colored>Ââ Éé Ôô Úú Ûû Ẃẃ Ýý</colored>, all of which can be found on existing Welsh keyboard layouts and in many popular fonts.</p>
+<p>Capitalisation and punctuation standards remain unchanged.</p>
+<p>Given the prior existence of a phonemic dictionary (the OED) and the regular nature of the spelling, this proposal is highly amenable to automation, with a simple dictionary implementation able to handle all but a small number of homographs such as &ldquo;lead&rdquo;, &ldquo;close&rdquo; and &ldquo;wind&rdquo;.</p>
+
+<p>The alphabet is simply aâbcdefghijlmnoôprstuûvwyz.</p>

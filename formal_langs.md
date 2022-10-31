@@ -8,29 +8,35 @@ The theory of formal languages has many applications in computer science and pro
 
 - Let $\Sigma$ be a finite set called an **alphabet**.
 - A **string** $s$ over $\Sigma$ is a finite sequence of elements from $\Sigma$. The length of $s$ is denoted $|s|$.
-- The **empty string** is the unique string of length $0$ and is denoted $\varepsilon$.
+- The **empty string** is the unique string of length $0$, denoted $\varepsilon$.
 - The **concatenation** of strings $s,t$ is the string formed of the characters in $s$ followed by the characters in $t$, denoted $st$.
-- The set of all strings over $\Sigma$ is denoted $\Sigma^\ast$ (the Kleene star operation). Formally, for a set $V$, define
-  - $V^0 = \{ \varepsilon \}$
-  - $V^{i+1} = \{ wv \mid w \in V^i, v \in V\}$
-  - $V^\ast = \bigcup_{n\in\N} V^n$
+- The set of all strings over $\Sigma$ is denoted $\Sigma^\ast$ (the **Kleene closure**).
 
 ### Formal languages
 
-- A __formal language__ $L$ over an alphabet $\Sigma$ is a subset $L \subseteq \Sigma^\ast$.
-- The concatenation of languages $L,M \subseteq \Sigma^\ast$ is given by $\{ lm \mid l \in L, m \in M\}$.
-- Given a language $L$, the Kleene star $L^\ast$ is the set of strings which are the concatenation of some number of strings in $L$, consistent with the formal definition above.
+- A __formal language__ $L$ over an alphabet $\Sigma$ is a set of strings $L \subseteq \Sigma^\ast$.
+- The concatenation of languages $L,M \subseteq \Sigma^\ast$ is given by $LM = \{ lm \mid l \in L, m \in M\}$.
+- The Kleene closure of a set of strings $S$ is the smallest superset of $S$ which contains $\varepsilon$ and is closed under concatenation.
 
 ## Regular languages
 
 ### Definition and regular expressions
 
-The set of **regular languages** over $\Sigma$ is defined inductively as follows:
+The set of **regular languages** over some fixed $\Sigma$ is defined inductively as follows:
 
-- The empty language $\emptyset$ is a regular language.
-- For each $a \in \Sigma$, the singleton language $\{ a \}$ is a regular language.
-- Given a regular language $R$, $R^\ast$ (Kleene star) is a regular language.
-- Given regular languages $R$ and $S$, $R \cup S$ (union) and $RS$ (concatenation) are regular languages.
+- The empty language $\emptyset$ is regular.
+- For each $a \in \Sigma$, the singleton language $\{a\}$ is regular.
+- If $R$ and $S$ are regular, then $R^\ast$ (Kleene closure), $R \cup S$ (union) and $RS$ (concatenation) are regular.
+
+A derivation of a regular language is known as a **regular expression**, often written in a compact notation with:
+
+- singleton languages $\{a\}$ represented simply by $a$
+- unions represented with $|$
+- operator precedence given by $^\ast$, concatenation, and $|$ in descending order of priority.
+
+For example, the expression $ab^\ast(c\mid \varepsilon)$ denotes the set of strings consisting of an $a$, followed by zero or more $b$s, followed by an optional $c$. ($\varepsilon$ here is short for $\emptyset^\ast$.)
+
+Practical implementations of regular expressions define additional syntax such as $a? = a \mid \varepsilon$ and 
 
 Given this definition, regular languages can be expressed using **regular expressions**: a straightforward l
 
@@ -50,11 +56,12 @@ A **deterministic finite automaton** or DFA is a simple model of a machine. Form
 - An initial state $q_0 \in Q$
 - A set of accepting states $F \subseteq Q$
 
-A string $w = a_1a_2\cdots a_n$ in $\Sigma^\ast$ is **recognized** by $M$ iff there is a sequence of states $r_0,\ldots,r_n$ such that
+A string $w = a_1a_2\cdots a_n$ in $\Sigma^\ast$ is **recognized** by $M$ iff the sequence of states $r_0,\ldots,r_n$ defined by
 
 - $r_0 = q_0$
 - $r_{i+1} = \delta(r_i,a_i)$ for $0 \leq i < n$
-- $r_n \in F$.
+
+satisfies $r_n \in F$.
 
 In other words, the machine starts in the initial state, treats $w$ as a sequence of instructions, and says &ldquo;accept&rdquo; if it ends up in an accepting state and &ldquo;reject&rdquo; otherwise.
 
@@ -66,14 +73,16 @@ It turns out that a language $L$ over $\Sigma$ is regular if and only if there e
 
 ### Non-deterministic finite automata
 
-An **non-deterministic finite automaton** or NFA$_\varepsilon$ is a DFA $M$ except that the transition function $\delta: Q \times \Sigma \to Q$ is replaced with a transition function $\Delta : Q \times (\Sigma \cup \varepsilon) \to \mathcal{P}(Q)$. In words, for any state $q$ and character $a$, $M$ may have transitions to any number of states $q'$, including none at all. Additionally, there are $\varepsilon$-transitions which $M$ may take without consuming a character from the input word $w$.
+An **non-deterministic finite automaton** or NFA is a DFA $M$ except that the transition function $\delta: Q \times \Sigma \to Q$ is replaced with a transition function $\Delta : Q \times (\Sigma \cup \varepsilon) \to \mathcal{P}(Q)$. In words, for any state $q$ and character $a$, $M$ may have transitions to any number of states $q'$, including none at all. Additionally, there are $\varepsilon$-transitions which $M$ may take without consuming a character from the input word $w$.
 
-Analogous to the above, a word $w$ is accepted by an NFA$_\varepsilon$ $M$ if and only if there exists a sequence of states with labelled transitions between them such that
+For $q,q' \in Q$ and $w \in \Sigma^\ast$, write $q \xRightarrow{w} q'$ if there exists $r_0,\ldots,r_m \in Q$ and $a_1,\ldots,a_m \in \Sigma \cup \varepsilon$ such that
 
-- the final state is an accepting state
-- the labelled transitions, concatenated, spell out $w$.
+- $r_0 = q$
+- $r_{i+1} \in\Delta(r_i, a_{i+1})$
+- $r_m = q'$
+- $w = a_1a_2\cdots a_m$.
 
-TODO: q ->u q'
+An NFA $(Q, \Sigma, \Delta, q_0, F)$ accepts a word $w$ iff $q_0 \xRightarrow{w} f$ for some $f \in F$.
 
 NFAs, despite possessing more constructs than DFAs, are in fact equal in expressive power, as can be shown via the **powerset construction** outlined below. However, the minimal DFA corresponding to an NFA may still have exponentially more states than the equivalent NFA.
 
@@ -149,18 +158,18 @@ A **pushdown automaton** or PDA is a generalisation of the finite automata discu
 - $Q$ is a finite set of states
 - $\Sigma$ is a finite set of input symbols (the alphabet)
 - $\Gamma$ is a finite set of stack symbols (the stack alphabet)
-- $\delta : Q \times (\Sigma \cup \varepsilon) \times \Gamma \to \mathcal{P}(Q, \Gamma^\ast)$ is the transition function
+- $\delta : Q \times (\Sigma \cup \{\varepsilon\}) \times \Gamma \to \mathcal{P}(Q, \Gamma^\ast)$ is the transition function
 - $q_0 \in Q$ is the start state
 - $Z_0 \in \Gamma$ is the start stack symbol
 - $F \subseteq Q$ is the set of final states
 
-Define an **instantaneous description** of $M$ as a $3$-tuple $(p, w, \beta) \in Q \times \Sigma^\ast \times \Gamma^\ast$. Define the **step relation** $\vdash_M$ on instantaneous descriptions as
+Define an **instantaneous description** or ID of $M$ as a $3$-tuple $(q, w, \beta) \in Q \times \Sigma^\ast \times \Gamma^\ast$. Define the **step relation** $\vdash_M$ on IDs as
 
 $$
-(q, ax, A\gamma) \vdash_M (q', x, \alpha\gamma)
+(q, ax, C\gamma) \vdash_M (q', x, \alpha\gamma)
 $$
 
-for all $q,a,A,q',\alpha$ with $(q',\alpha) \in \delta(q,a,A)$, all $x \in \Sigma^\ast$, and all $\gamma \in \Gamma^\ast$.
+for all $q,a,C,q',\alpha$ with $(q',\alpha) \in \delta(q,a,C)$, all $x \in \Sigma^\ast$, and all $\gamma \in \Gamma^\ast$.
 
 The language accepted by $M$ is then defined as
 
@@ -172,4 +181,10 @@ where $\vdash_M^\ast$ denotes the reflexive&ndash;transitive closure of $\vdash_
 
 It turns out that pushdown automata recognise exactly the context-free languages. For a given 
 
-In general, pushdown automata are nondeterministic; there may be multiple available transitions in the grammar.
+In general, pushdown automata are nondeterministic; there may be many available transitions from a given point in the machine's operation. A __deterministic__ pushdown automaton, on the other hand, satisfies for all $q \in Q, a \in \Sigma, a_\varepsilon \in \Sigma \cup \{ \varepsilon \}, C \in \Gamma$:
+
+
+- $|\delta(q,a_\varepsilon,C)| \leq 1$
+- $\delta(q,\varepsilon,C) \neq \emptyset \implies \delta(q,a,C) = \emptyset$
+
+A **deterministic context-free language** is a language $L(M)$ for some deterministic pushdown automaton $M$. Deterministic context-free languages form a solid theoretical basis for

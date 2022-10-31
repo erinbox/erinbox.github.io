@@ -3,7 +3,7 @@ title: A realistic proposal for English spelling reform (v0.2.0)
 layout: default
 ---
 
-<p>The idea is to take the phonemic British RP pronunciations from the Oxford English Dictionary and translate the IPA symbols into something more natural, ignoring things like stress and aspiration and attempting to preserve the look and feel of written English.</p>
+<p>The idea is to take phonemic British RP pronunciations from an English dictionary and translate the IPA symbols into something more natural, ignoring stress and aspiration.</p>
 
 <script>
 const button = document.getElementById("north-wind-button");
@@ -20,12 +20,12 @@ button.addEventListener("click", () => {
 });
 </script>
 
-<h2>Spelling rules</h2>
+<h2>Letters</h2>
 <p>There are 13 basic vowels and 7 double vowels. Some of the vowels may sound different depending on your dialect; for example, I speak a dialect which merges <strong>u</strong>/<strong>w</strong> and <strong>wu</strong>/<strong>ó</strong>. (The use of <strong>w</strong> to denote the vowels in &ldquo;foot&rdquo; and &ldquo;goose&rdquo; is taken from Welsh.)</p>
 <table>
 <thead>
 <tr>
-<th style="text-align:center">Letters</th>
+<th style="text-align:center">Letter</th>
 <th style="text-align:center">Sound</th>
 <th style="text-align:center">IPA</th>
 </tr>
@@ -42,113 +42,6 @@ button.addEventListener("click", () => {
 <td style="text-align:center">/ɑː/</td>
 </tr>
 <tr>
-<td style="text-align:center">e</td>
-<td style="text-align:center">b<strong>e</strong>ll</td>
-<td style="text-align:center">/e/</td>
-</tr>
-<tr>
-<td style="text-align:center">é</td>
-<td style="text-align:center">squ<strong>are</strong></td>
-<td style="text-align:center">/ɛː/</td>
-</tr>
-<tr>
-<td style="text-align:center">i</td>
-<td style="text-align:center">k<strong>i</strong>t, hon<strong>e</strong>st</td>
-<td style="text-align:center">/ɪ/, /ᵻ/</td>
-</tr>
-<tr>
-<td style="text-align:center">í</td>
-<td style="text-align:center">happ<strong>y</strong>, fl<strong>ee</strong>ce</td>
-<td style="text-align:center">/i/, /iː/</td>
-</tr>
-<tr>
-<td style="text-align:center">o</td>
-<td style="text-align:center">l<strong>o</strong>t</td>
-<td style="text-align:center">/ɒ/</td>
-</tr>
-<tr>
-<td style="text-align:center">ó</td>
-<td style="text-align:center">h<strong>aw</strong>k</td>
-<td style="text-align:center">/ɔː/</td>
-</tr>
-<tr>
-<td style="text-align:center">u</td>
-<td style="text-align:center">c<strong>u</strong>p</td>
-<td style="text-align:center">/ʌ/</td>
-</tr>
-<tr>
-<td style="text-align:center">w</td>
-<td style="text-align:center">f<strong>oo</strong>t, J<strong>u</strong>ly</td>
-<td style="text-align:center">/ʊ/, /ᵿ/</td>
-</tr>
-<tr>
-<td style="text-align:center">ẃ</td>
-<td style="text-align:center">g<strong>oo</strong>se</td>
-<td style="text-align:center">/uː/</td>
-</tr>
-<tr>
-<td style="text-align:center">y</td>
-<td style="text-align:center">alph<strong>a</strong></td>
-<td style="text-align:center">/ə/</td>
-</tr>
-<tr>
-<td style="text-align:center">ý</td>
-<td style="text-align:center">n<strong>ur</strong>se</td>
-<td style="text-align:center">/ɜː/</td>
-</tr>
-<tr>
-<td style="text-align:center">ei</td>
-<td style="text-align:center">d<strong>ay</strong></td>
-<td style="text-align:center">/eɪ/</td>
-</tr>
-<tr>
-<td style="text-align:center">ai</td>
-<td style="text-align:center">p<strong>i</strong>n<strong>e</strong></td>
-<td style="text-align:center">/aɪ/</td>
-</tr>
-<tr>
-<td style="text-align:center">aw</td>
-<td style="text-align:center">m<strong>ou</strong>th</td>
-<td style="text-align:center">/aʊ/</td>
-</tr>
-<tr>
-<td style="text-align:center">yw</td>
-<td style="text-align:center">g<strong>oa</strong>t</td>
-<td style="text-align:center">/əʊ/</td>
-</tr>
-<tr>
-<td style="text-align:center">ói</td>
-<td style="text-align:center">ch<strong>oi</strong>ce</td>
-<td style="text-align:center">/ɔɪ/</td>
-</tr>
-<tr>
-<td style="text-align:center">iy</td>
-<td style="text-align:center">h<strong>ere</strong></td>
-<td style="text-align:center">/ɪə/</td>
-</tr>
-<tr>
-<td style="text-align:center">wy</td>
-<td style="text-align:center">c<strong>ure</strong></td>
-<td style="text-align:center">/ʊə/</td>
-</tr>
-</tbody>
-</table>
-<!-- <p>For the purposes of collation, vowels with a circumflex (á, ó, û) are considered separate vowels, while vowels with an acute accent (é, ú, ẃ, ý) are not as they are considered long versions of the corresponding unaccented vowel.</p> -->
-
-</tbody>
-</table>
-<p>With a few exceptions, most of the consonants remain unchanged. Every consonant has exactly one pronunciation: <strong>c</strong> is always hard as in <strong>c</strong>ap, never soft as in <strong>c</strong>ent. Note the distinction between <strong>th</strong> and <strong>dh</strong>.</p>
-<p>The letters <strong>k</strong>, <strong>q</strong> and <strong>x</strong> are not used.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">Letters</th>
-<th style="text-align:center">Sound</th>
-<th style="text-align:center">IPA</th>
-</tr>
-</thead>
-<tbody>
-<tr>
 <td style="text-align:center">b</td>
 <td style="text-align:center"><strong>b</strong>ed</td>
 <td style="text-align:center">/b/</td>
@@ -162,6 +55,16 @@ button.addEventListener("click", () => {
 <td style="text-align:center">d</td>
 <td style="text-align:center"><strong>d</strong>uck</td>
 <td style="text-align:center">/d/</td>
+</tr>
+<tr>
+<td style="text-align:center">e</td>
+<td style="text-align:center">b<strong>e</strong>ll</td>
+<td style="text-align:center">/e/</td>
+</tr>
+<tr>
+<td style="text-align:center">é</td>
+<td style="text-align:center">squ<strong>are</strong></td>
+<td style="text-align:center">/ɛː/</td>
 </tr>
 <tr>
 <td style="text-align:center">f</td>
@@ -179,7 +82,17 @@ button.addEventListener("click", () => {
 <td style="text-align:center">/h/</td>
 </tr>
 <tr>
-<td style="text-align:center">j*</td>
+<td style="text-align:center">i</td>
+<td style="text-align:center">k<strong>i</strong>t, hon<strong>e</strong>st</td>
+<td style="text-align:center">/ɪ/, /ᵻ/</td>
+</tr>
+<tr>
+<td style="text-align:center">í</td>
+<td style="text-align:center">happ<strong>y</strong>, fl<strong>ee</strong>ce</td>
+<td style="text-align:center">/i/, /iː/</td>
+</tr>
+<tr>
+<td style="text-align:center">j</td>
 <td style="text-align:center"><strong>y</strong>es</td>
 <td style="text-align:center">/j/</td>
 </tr>
@@ -197,6 +110,16 @@ button.addEventListener("click", () => {
 <td style="text-align:center">n</td>
 <td style="text-align:center"><strong>n</strong>ight</td>
 <td style="text-align:center">/n/</td>
+</tr>
+<tr>
+<td style="text-align:center">o</td>
+<td style="text-align:center">l<strong>o</strong>t</td>
+<td style="text-align:center">/ɒ/</td>
+</tr>
+<tr>
+<td style="text-align:center">ó</td>
+<td style="text-align:center">h<strong>aw</strong>k</td>
+<td style="text-align:center">/ɔː/</td>
 </tr>
 <tr>
 <td style="text-align:center">p</td>
@@ -219,14 +142,73 @@ button.addEventListener("click", () => {
 <td style="text-align:center">/t/</td>
 </tr>
 <tr>
+<td style="text-align:center">u</td>
+<td style="text-align:center">c<strong>u</strong>p</td>
+<td style="text-align:center">/ʌ/</td>
+</tr>
+<tr>
 <td style="text-align:center">v</td>
 <td style="text-align:center"><strong>v</strong>iew</td>
 <td style="text-align:center">/v/</td>
 </tr>
 <tr>
+<td style="text-align:center">w</td>
+<td style="text-align:center">f<strong>oo</strong>t, J<strong>u</strong>ly</td>
+<td style="text-align:center">/ʊ/, /ᵿ/</td>
+</tr>
+<tr>
+<td style="text-align:center">ẃ</td>
+<td style="text-align:center">g<strong>oo</strong>se</td>
+<td style="text-align:center">/uː/</td>
+</tr>
+<tr>
+<td style="text-align:center">y</td>
+<td style="text-align:center">alph<strong>a</strong></td>
+<td style="text-align:center">/ə/</td>
+</tr>
+<tr>
+<td style="text-align:center">ý</td>
+<td style="text-align:center">n<strong>ur</strong>se</td>
+<td style="text-align:center">/ɜː/</td>
+</tr>
+<tr>
 <td style="text-align:center">z</td>
 <td style="text-align:center"><strong>z</strong>ero</td>
 <td style="text-align:center">/z/</td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+  <li>Accented letters (áéíóẃý) are not considered part of the alphabet.</li>
+  <li>The alphabet is as before but with kqx removed.</li>
+  <li>Every letter corresponds to exactly one sound (unless in a digraph).</li>
+</ul>
+
+
+
+</tbody>
+</table>
+<p>With a few exceptions, most of the consonants remain unchanged. Every consonant has exactly one pronunciation: <strong>c</strong> is always hard as in <strong>c</strong>ap, never soft as in <strong>c</strong>ent. Note the distinction between <strong>th</strong> and <strong>dh</strong>.</p>
+<p>The letters <strong>k</strong>, <strong>q</strong> and <strong>x</strong> are not used.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Letters</th>
+<th style="text-align:center">Sound</th>
+<th style="text-align:center">IPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">ai</td>
+<td style="text-align:center">p<strong>i</strong>n<strong>e</strong></td>
+<td style="text-align:center">/aɪ/</td>
+</tr>
+<tr>
+<td style="text-align:center">aw</td>
+<td style="text-align:center">m<strong>ou</strong>th</td>
+<td style="text-align:center">/aʊ/</td>
 </tr>
 <tr>
 <td style="text-align:center">ch</td>
@@ -234,19 +216,34 @@ button.addEventListener("click", () => {
 <td style="text-align:center">/tʃ/</td>
 </tr>
 <tr>
-<td style="text-align:center">dh*</td>
+<td style="text-align:center">dh</td>
 <td style="text-align:center"><strong>th</strong>is</td>
 <td style="text-align:center">/ð/</td>
 </tr>
 <tr>
-<td style="text-align:center">gh*</td>
+<td style="text-align:center">ei</td>
+<td style="text-align:center">d<strong>ay</strong></td>
+<td style="text-align:center">/eɪ/</td>
+</tr>
+<tr>
+<td style="text-align:center">gh</td>
 <td style="text-align:center"><strong>j</strong>oke</td>
 <td style="text-align:center">/dʒ/</td>
+</tr>
+<tr>
+<td style="text-align:center">iy</td>
+<td style="text-align:center">h<strong>ere</strong></td>
+<td style="text-align:center">/ɪə/</td>
 </tr>
 <tr>
 <td style="text-align:center">ng</td>
 <td style="text-align:center">ki<strong>ng</strong></td>
 <td style="text-align:center">/ŋ/, /ŋg/</td>
+</tr>
+<tr>
+<td style="text-align:center">ói</td>
+<td style="text-align:center">ch<strong>oi</strong>ce</td>
+<td style="text-align:center">/ɔɪ/</td>
 </tr>
 <tr>
 <td style="text-align:center">sh</td>
@@ -259,12 +256,22 @@ button.addEventListener("click", () => {
 <td style="text-align:center">/θ/</td>
 </tr>
 <tr>
-<td style="text-align:center">wh*</td>
+<td style="text-align:center">wh</td>
 <td style="text-align:center"><strong>w</strong>alk</td>
 <td style="text-align:center">/w/</td>
 </tr>
 <tr>
-<td style="text-align:center">zh*</td>
+<td style="text-align:center">wy</td>
+<td style="text-align:center">c<strong>ure</strong></td>
+<td style="text-align:center">/ʊə/</td>
+</tr>
+<tr>
+<td style="text-align:center">yw</td>
+<td style="text-align:center">g<strong>oa</strong>t</td>
+<td style="text-align:center">/əʊ/</td>
+</tr>
+<tr>
+<td style="text-align:center">zh</td>
 <td style="text-align:center">mea<strong>s</strong>ure</td>
 <td style="text-align:center">/ʒ/</td>
 </tr>

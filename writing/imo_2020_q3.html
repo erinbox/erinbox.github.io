@@ -1,0 +1,25 @@
+---
+title: IMO 2020 Problem 3
+layout: default
+category: maths
+---
+
+An elegant problem from the International Mathematical Olympiad.
+
+<h2>Question</h2>
+
+There are \(4n\) pebbles of weights \(1,2,\ldots,4n\). Each pebble is coloured in one of \(n\) colours and there are four pebbles of each colour. Show that we can arrange the pebbles into two piles so that the following two conditions are both satisfied:
+
+<ul>
+  <li>The total weights of both piles are the same.</li>
+  <li>Each pile contains two pebbles of each colour.</li>
+</ul>
+
+<p>Scroll down for the answer.</p>
+
+<div style="height: 700px;"></div>
+
+<h2>Answer</h2>
+
+<p>Draw the 4-regular multigraph \(G\) with colours as vertices and edges between the colours of pebble pairs \((1,4n)\), \((2,4n-1)\), &hellip;, \((2n,2n+1)\). The question becomes whether it&#8217;s possible to remove half of the edges from \(G\) to obtain a 2-regular multigraph.</p>
+<p>Since \(G\) is 4-regular, it has a Eulerian cycle of even length, from which deleting every other edge will work.</p>

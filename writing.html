@@ -2,18 +2,14 @@
 layout: default
 ---
 
-<h2>Maths & Computer Science</h2>
-<ul>
-  <li>Two characterisations of the primitive recursive functions, and some thoughts on mathematical notation</li>
-  <li>A primer on formal language theory</li>
-</ul>
-
-<h2>Language</h2>
-<ul>
-  <li><a href="/writing/spelling">A realistic proposal for English spelling reform</a></li>
-</ul>
-
-<h2>Bridge</h2>
-<ul>
-  <li><a href="/writing/bridge-minimal">Some puzzles on minimal games and slams</a></li>
-</ul>
+{% assign categories = site.html_pages | map: "category" | uniq | sort_natural %}
+{% for category in categories %}
+    <h2>{{ category }}</h2>
+    <ul>
+    {% for page in site.html_pages %}
+        {% if page.category == category and category != empty %}
+            <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+{% endfor %}

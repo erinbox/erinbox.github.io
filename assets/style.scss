@@ -66,10 +66,34 @@
     src: url("fonts/concourse_ot_6_semibold_italic.woff2");
 }
 
+@font-face {
+    font-family: "Fira Mono";
+    font-weight: 300;
+    src: url("fonts/fira_mono_regular.woff2");
+}
+
+
+@font-face {
+    font-family: "Fira Mono";
+    font-weight: 600;
+    src: url("fonts/fira_mono_regular.woff2");
+}
+
 /* Variables and functions */
 
 $serif-font: EquityA, TimesNewRoman, Times New Roman, Times, Baskerville, Georgia, serif;
 $sans-serif-font: Concourse, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;
+$monospaced-font: 
+             "Fira Mono", ui-monospace, 
+             Menlo, Monaco, 
+             "Cascadia Mono", "Segoe UI Mono", 
+             "Roboto Mono", 
+             "Oxygen Mono", 
+             "Ubuntu Monospace", 
+             "Source Code Pro",
+             "Fira Mono", 
+             "Droid Sans Mono", 
+             "Courier New", monospace;
 $body-text-size: 23px;
 $body-line-spacing: 1.45;
 $bg-color: #FFFFFF;
@@ -87,6 +111,10 @@ $accent-color: #E34234;
     /* True for Equity and Concourse only */
     font-feature-settings: "ss10";
 }
+
+sc { @include small-caps; font-family: $sans-serif-font; }
+
+.sf { font-family: $sans-serif-font; }
 
 /* */
 
@@ -185,6 +213,7 @@ td, th {
     padding-top: 0px;
     padding-bottom: 0px;
     // padding: 0 $cell-padding 0 $cell-padding;
+    text-align: center;
 }
 
 th {
@@ -193,6 +222,8 @@ th {
     font-family: $sans-serif-font;
     // font-size: 105%;
 }
+
+table, td, th { border: 1px; border-collapse: collapse; }
 
 /* Lists */
 
@@ -207,13 +238,24 @@ sig {
     font-size: 105%;
     @include small-caps;
     text-align: right;
-    display: block;
-
-
+    margin-bottom: 25px;
 }
 
 sig::before { content: "—" }
 
 colored {
     color: $accent-color;
+}
+
+audio { width: 100%; }
+img { margin: auto; text-align: center; display: block; }
+textarea { resize: none; width: 100%;
+    font-family: $serif-font;
+    font-size: $body-text-size;
+    margin: 0.5em auto;
+}
+
+code {
+    font-family: $monospaced-font;
+    font-size: $body-text-size * 0.9;
 }

@@ -114,6 +114,7 @@ Lastly:
     "A": "Á", "C": "Ć", "D": "Ð", "E": "É", "G": "Ǵ", "I": "Í", "L": "Ł",
     "N": "Ń", "O": "Ó", "S": "Ś", "T": "Þ", "W": "Ẃ", "Y": "Ý", "Z": "Ź",
   }
+  const lettersInAlphabet = new Set([..."AÁBCĆDÐEÉFGǴHIÍJLŁMNŃOÓPRSŚTÞUVWẂYÝZŹ"]);
 
   const equalCaseInsensitive = (a,b) =>
       a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
@@ -123,7 +124,7 @@ Lastly:
   const addDiacritics = () => {
       const box = document.getElementById("input");
       const text = box.value;
-      const replacementText = [];
+      var replacementText = [];
       if (text.length > 0 && !equalCaseInsensitive(text[0], "k")) {
           replacementText.push(text[0]);
       }
@@ -143,13 +144,38 @@ Lastly:
               replacementText.push(text[i]);
           }
       }
-      box.value = replacementText.join("");
+      replacementText = replacementText.join("");
+      box.value = replacementText;
+
+      const lettersUsed = new Set();
+      for (letter of replacementText) {
+          var uLetter = letter.toUpperCase();
+          if (lettersInAlphabet.has(uLetter)) {
+              lettersUsed.add(uLetter);
+          }
+      }
+      const alphabet = document.getElementById("alphabet");
+      for (tag of alphabet.children) {
+          if (lettersUsed.has(tag.textContent.toUpperCase())) {
+              tag.classList.add("colored");
+          } else {
+              tag.classList.remove("colored");
+          }
+      }
+      document.getElementById("letter-count").textContent =
+        `${lettersUsed.size}/37`;
   }
 </script>
 
+<p><span id="alphabet">
+  <span>a</span><span>á</span><span>b</span><span>c</span><span>ć</span><span>d</span><span>ð</span><span>e</span><span>é</span><span>f</span><span>g</span><span>ǵ</span><span>h</span><span>i</span><span>í</span><span>j</span><span>l</span><span>ł</span><span>m</span><span>n</span><span>ń</span><span>o</span><span>ó</span><span>p</span><span>r</span><span>s</span><span>ś</span><span>t</span><span>þ</span><span>u</span><span>v</span><span>w</span><span>ẃ</span><span>y</span><span>ý</span><span>z</span><span>ź</span>
+</span><span id="letter-count">0/37</span></p>
+
 <p>The alphabet is reproduced for convenience below. To type an accented letter, type the base letter plus <code>k</code>. &laquo;ð&raquo; and &laquo;þ&raquo; are written <code>dk</code> and <code>tk</code> respectively.</p>
 
-<table id="alphabet-table">
+
+
+<table>
   <tr><td>Aa</td><td>Áá</td><td>Bb</td><td>Cc</td><td>Ćć</td><td>Dd</td><td>Ðð</td></tr>
   <tr><td>Ee</td><td>Éé</td><td>Ff</td><td>Gg</td><td>Ǵǵ</td><td>Hh</td><td>Ii</td></tr>
   <tr><td>Íí</td><td>Jj</td><td>Ll</td><td>Łł</td><td>Mm</td><td>Nn</td><td>Ńń</td></tr>

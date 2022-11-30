@@ -6,6 +6,14 @@ category: language
 
 <h2>In short</h2>
 
+<table>
+  <tr><td>rough</td><td>&#8594;</td><td>ruf</td></tr>
+  <tr><td>fair</td><td>&#8594;</td><td>fé</td></tr>
+  <tr><td>cheese</td><td>&#8594;</td><td>ćíz</td></tr>
+  <tr><td>honest</td><td>&#8594;</td><td>onist</td></tr>
+  <tr><td>connoisseur</td><td>&#8594;</td><td>conysý</td></tr>
+</table>
+
 A one-to-one mapping between English phonemes and letters, much like the successful reform of Czech orthography proposed by Jan Hus in <em><a href="https://en.wikipedia.org/wiki/Orthographia_bohemica" target="_blank" rel="noreferrer">De orthographia bohemica</a></em>. Mouse over a letter to see how it sounds:
 
 <script>
@@ -60,6 +68,63 @@ const update_letter_display = (str) => {
     document.getElementById("letter-display-sounds-like").innerHTML = sounds_like;
     document.getElementById("letter-display-ipa").innerText = ipa;
     document.getElementById("letter-display-input").innerText = input;
+}
+
+const diacriticLetters = {
+    "A": "Á", "C": "Ć", "D": "Ð", "E": "É", "G": "Ǵ", "I": "Í", "L": "Ł",
+    "N": "Ń", "O": "Ó", "S": "Ś", "T": "Þ", "W": "Ẃ", "Y": "Ý", "Z": "Ź",
+  }
+const lettersInAlphabet = new Set([..."AÁBCĆDÐEÉFGǴHIÍJLŁMNŃOÓPRSŚTÞUVWẂYÝZŹ"]);
+
+const equalCaseInsensitive = (a,b) =>
+    a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
+const isUpper = (c) => c === c.toUpperCase();
+const isLower = (c) => !isUpper(c);
+
+const addDiacritics = () => {
+    const box = document.getElementById("input");
+    const text = box.value;
+    var replacementText = [];
+    if (text.length > 0 && !equalCaseInsensitive(text[0], "k")) {
+        replacementText.push(text[0]);
+    }
+    for (var i = 1; i < text.length; i++) {
+        const lastChar = text[i];
+        const penultChar = text[i-1];
+        if (equalCaseInsensitive(lastChar, "k")) {
+            var replacement = diacriticLetters[penultChar.toUpperCase()];
+            if (replacement !== undefined) {
+                if (isLower(penultChar)) {
+                    replacement = replacement.toLowerCase();
+                }
+                replacementText.pop();
+                replacementText.push(replacement);
+            }
+        } else {
+            replacementText.push(text[i]);
+        }
+    }
+    replacementText = replacementText.join("");
+    box.value = replacementText;
+
+    // pangram stuff
+    const lettersUsed = new Set();
+    for (letter of replacementText) {
+        var uLetter = letter.toUpperCase();
+        if (lettersInAlphabet.has(uLetter)) {
+            lettersUsed.add(uLetter);
+        }
+    }
+    const alphabet = document.getElementById("pangram");
+    for (tag of alphabet.children) {
+        if (lettersUsed.has(tag.textContent.toUpperCase())) {
+            tag.classList.add("colored");
+        } else {
+            tag.classList.remove("colored");
+        }
+    }
+    document.getElementById("letter-count").textContent =
+    `${lettersUsed.size}/37`;
 }
 </script>
 
@@ -164,69 +229,11 @@ const update_letter_display = (str) => {
   rows="5">
 </textarea>
 
-<script>
-  const diacriticLetters = {
-    "A": "Á", "C": "Ć", "D": "Ð", "E": "É", "G": "Ǵ", "I": "Í", "L": "Ł",
-    "N": "Ń", "O": "Ó", "S": "Ś", "T": "Þ", "W": "Ẃ", "Y": "Ý", "Z": "Ź",
-  }
-  const lettersInAlphabet = new Set([..."AÁBCĆDÐEÉFGǴHIÍJLŁMNŃOÓPRSŚTÞUVWẂYÝZŹ"]);
-
-  const equalCaseInsensitive = (a,b) =>
-      a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
-  const isUpper = (c) => c === c.toUpperCase();
-  const isLower = (c) => !isUpper(c);
-
-  const addDiacritics = () => {
-      const box = document.getElementById("input");
-      const text = box.value;
-      var replacementText = [];
-      if (text.length > 0 && !equalCaseInsensitive(text[0], "k")) {
-          replacementText.push(text[0]);
-      }
-      for (var i = 1; i < text.length; i++) {
-          const lastChar = text[i];
-          const penultChar = text[i-1];
-          if (equalCaseInsensitive(lastChar, "k")) {
-              var replacement = diacriticLetters[penultChar.toUpperCase()];
-              if (replacement !== undefined) {
-                  if (isLower(penultChar)) {
-                      replacement = replacement.toLowerCase();
-                  }
-                  replacementText.pop();
-                  replacementText.push(replacement);
-              }
-          } else {
-              replacementText.push(text[i]);
-          }
-      }
-      replacementText = replacementText.join("");
-      box.value = replacementText;
-
-      const lettersUsed = new Set();
-      for (letter of replacementText) {
-          var uLetter = letter.toUpperCase();
-          if (lettersInAlphabet.has(uLetter)) {
-              lettersUsed.add(uLetter);
-          }
-      }
-      const alphabet = document.getElementById("alphabet");
-      for (tag of alphabet.children) {
-          if (lettersUsed.has(tag.textContent.toUpperCase())) {
-              tag.classList.add("colored");
-          } else {
-              tag.classList.remove("colored");
-          }
-      }
-      document.getElementById("letter-count").textContent =
-        `${lettersUsed.size}/37`;
-  }
-</script>
-
-<p>Try to make a pangram! <span id="alphabet">
+<p>Try to make a pangram! <span id="pangram">
   <span>a</span><span>á</span><span>b</span><span>c</span><span>ć</span><span>d</span><span>ð</span><span>e</span><span>é</span><span>f</span><span>g</span><span>ǵ</span><span>h</span><span>i</span><span>í</span><span>j</span><span>l</span><span>ł</span><span>m</span><span>n</span><span>ń</span><span>o</span><span>ó</span><span>p</span><span>r</span><span>s</span><span>ś</span><span>t</span><span>þ</span><span>u</span><span>v</span><span>w</span><span>ẃ</span><span>y</span><span>ý</span><span>z</span><span>ź</span>
 </span><span id="letter-count">0/37</span></p>
 
-
+<div style="height: 20em"></div>
 <h2>The details</h2>
 
 (v0.3.0)
@@ -314,7 +321,6 @@ Lastly:
 <li>Syllabic consonants like the final syllables of mansion, chasm and handle are written with a <strong>y</strong> before the consonant: &laquo;manśyn&raquo;, &laquo;cazym&raquo;, &laquo;handyl&raquo;.</li>
 <li>The word &ldquo;the&rdquo; is written &laquo;ðy&raquo; before consonants and &laquo;ðí&raquo; before vowels, reflecting the pronunciation like &ldquo;a&rdquo; and &ldquo;an&rdquo;.</li>
 <li>Reduced vowels are something I&#8217;m going to think more about.</li>
-<!-- <li>Connecting words often reduced, such as &ldquo;have&rdquo; or &ldquo;that&rdquo;, are always written as if pronounced with their full vowel.</li> -->
 </ul>
 <h2>Examples</h2>
 
@@ -328,5 +334,3 @@ Lastly:
 <h3>Ðy Nóþ Łind and ðy Sun</h3>
 <p>Ðy Nóþ Łind and ðy Sun łý dispjẃtiń łić łoz ðy sćrońgy, łen y ćravyly ceim yloń rapt in y łóm clywk. Ðei ygríd ðat ðy łun hẃ fýst sucsídyd in meicing ðy ćravyly teic hiz clywk of śud bí cynsidyd sćrońgy ðan ðí uðy. Ðen ðy Nóþ Łind blẃ az hád az hí cwd, but ðy mó hí blẃ ðy mó clywslí did ðy ćravyly fywld hiz clywc yrawnd him; and at lást ðy Nóþ Łind geiv up ðí ytempt. Ðen ðy Sun śaind awt łómlí, and imídíytly ðy ćravyly twc of hiz clywc. And syw ðy Nóþ Łind łoz yblaiǵd tẃ cynfes ðat ðy Sun łoz ðy sćrońgy ov ðy tẃ.</p>
 </blockquote>
-
-<h2>Input</h2>

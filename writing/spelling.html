@@ -16,188 +16,80 @@ category: language
 
 A one-to-one mapping between English phonemes and letters, much like the successful reform of Czech orthography proposed by Jan Hus in <em><a href="https://en.wikipedia.org/wiki/Orthographia_bohemica" target="_blank" rel="noreferrer">De orthographia bohemica</a></em>. Mouse over a letter to see how it sounds:
 
-<script>
-const LETTER_DISPLAY_DATA = {
-    "Aa": [[[    "act", 0, 1]                  ], [ "æ"     ],  "a" ],
-    "Áá": [[[   "yarn", 1, 3]                  ], ["ɑː"     ], "ak" ],
-    "Bb": [[[    "boy", 0, 1]                  ], [ "b"     ],  "b" ],
-    "Cc": [[[   "coat", 0, 1]                  ], [ "k"     ],  "c" ],
-    "Ćć": [[[  "chase", 0, 2]                  ], ["tʃ"     ], "ck" ],
-    "Dd": [[[    "dog", 0, 1]                  ], [ "d"     ],  "d" ],
-    "Ðð": [[[   "this", 0, 2]                  ], [ "ð"     ], "dk" ],
-    "Ee": [[[    "bet", 1, 2]                  ], [ "e"     ],  "e" ],
-    "Éé": [[[   "pair", 1, 4]                  ], ["ɛə"     ], "ek" ],
-    "Ff": [[[   "fast", 0, 1]                  ], [ "f"     ],  "f" ],
-    "Gg": [[[     "go", 0, 1]                  ], [ "g"     ],  "g" ],
-    "Ǵǵ": [[[   "joke", 0, 1]                  ], ["dʒ"     ], "gk" ],
-    "Hh": [[[    "hat", 0, 1]                  ], [ "h"     ],  "h" ],
-    "Ii": [[[    "kit", 1, 2], ["honest", 3, 4]], [ "ɪ", "ᵻ"],  "i" ],
-    "Íí": [[[   "reed", 1, 3], [ "happy", 4, 5]], ["iː", "i"], "ik" ],
-    "Jj": [[[    "yes", 0, 1]                  ], [ "j"     ],  "j" ],
-    "Ll": [[[   "lion", 0, 1]                  ], [ "l"     ],  "l" ],
-    "Łł": [[[   "wind", 0, 1]                  ], [ "w"     ], "lk" ],
-    "Mm": [[[    "man", 0, 1]                  ], [ "m"     ],  "m" ],
-    "Nn": [[[   "near", 0, 1]                  ], [ "n"     ],  "n" ],
-    "Ńń": [[[   "sing", 2, 4]                  ], [ "ŋ"     ], "nk" ],
-    "Oo": [[[    "dot", 1, 2]                  ], [ "ɒ"     ],  "o" ],
-    "Óó": [[[   "born", 1, 3]                  ], ["ɔː"     ], "ok" ],
-    "Pp": [[[    "pin", 0, 1]                  ], [ "p"     ],  "p" ],
-    "Rr": [[[   "rope", 0, 1]                  ], [ "r"     ],  "r" ],
-    "Ss": [[[    "say", 0, 1]                  ], [ "s"     ],  "s" ],
-    "Śś": [[[  "sheet", 0, 2]                  ], [ "ʃ"     ], "sk" ],
-    "Tt": [[[    "tap", 0, 1]                  ], [ "t"     ],  "t" ],
-    "Þþ": [[[   "thin", 0, 2]                  ], [ "θ"     ], "tk" ],
-    "Uu": [[[    "cup", 1, 2]                  ], [ "ʌ"     ],  "u" ],
-    "Vv": [[[    "van", 0, 1]                  ], [ "v"     ],  "v" ],
-    "Ww": [[[   "book", 1, 3], [  "July", 1, 2]], [ "ʊ", "ᵿ"],  "w" ],
-    "Ẃẃ": [[[  "goose", 1, 3], ["actual", 3, 4]], ["uː", "u"], "wk" ],
-    "Yy": [[[  "enter", 3, 5]                  ], [ "ə"     ],  "y" ],
-    "Ýý": [[[   "burn", 1, 3]                  ], ["ɜː"     ], "yk" ],
-    "Zz": [[[    "zoo", 0, 1]                  ], [ "z"     ],  "z" ],
-    "Źź": [[["measure", 3, 4]                  ], [ "ʒ"     ], "zk" ],
-}
-
-const update_letter_display = (str) => {
-    const data = LETTER_DISPLAY_DATA[str];
-    const sounds_like = data[0]
-        .map(word => `${word[0].slice(0,word[1])}<strong>${word[0].slice(word[1],word[2])}</strong>${word[0].slice(word[2])}`)
-        .join(", ");
-    const ipa = data[1].map(s => `/${s}/`).join(", ");
-    const input = data[2];
-    document.getElementById("letter-display-big-letters").innerText = str;
-    document.getElementById("letter-display-sounds-like").innerHTML = sounds_like;
-    document.getElementById("letter-display-ipa").innerText = ipa;
-    document.getElementById("letter-display-input").innerText = input;
-}
-
-const diacriticLetters = {
-    "A": "Á", "C": "Ć", "D": "Ð", "E": "É", "G": "Ǵ", "I": "Í", "L": "Ł",
-    "N": "Ń", "O": "Ó", "S": "Ś", "T": "Þ", "W": "Ẃ", "Y": "Ý", "Z": "Ź",
-  }
-const lettersInAlphabet = new Set([..."AÁBCĆDÐEÉFGǴHIÍJLŁMNŃOÓPRSŚTÞUVWẂYÝZŹ"]);
-
-const equalCaseInsensitive = (a,b) =>
-    a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
-const isUpper = (c) => c === c.toUpperCase();
-const isLower = (c) => !isUpper(c);
-
-const addDiacritics = () => {
-    const box = document.getElementById("input");
-    const text = box.value;
-    var replacementText = [];
-    if (text.length > 0 && !equalCaseInsensitive(text[0], "k")) {
-        replacementText.push(text[0]);
-    }
-    for (var i = 1; i < text.length; i++) {
-        const lastChar = text[i];
-        const penultChar = text[i-1];
-        if (equalCaseInsensitive(lastChar, "k")) {
-            var replacement = diacriticLetters[penultChar.toUpperCase()];
-            if (replacement !== undefined) {
-                if (isLower(penultChar)) {
-                    replacement = replacement.toLowerCase();
-                }
-                replacementText.pop();
-                replacementText.push(replacement);
-            }
-        } else {
-            replacementText.push(text[i]);
-        }
-    }
-    replacementText = replacementText.join("");
-    box.value = replacementText;
-
-    // pangram stuff
-    const lettersUsed = new Set();
-    for (letter of replacementText) {
-        var uLetter = letter.toUpperCase();
-        if (lettersInAlphabet.has(uLetter)) {
-            lettersUsed.add(uLetter);
-        }
-    }
-    const alphabet = document.getElementById("pangram");
-    for (tag of alphabet.children) {
-        if (lettersUsed.has(tag.textContent.toUpperCase())) {
-            tag.classList.add("colored");
-        } else {
-            tag.classList.remove("colored");
-        }
-    }
-    document.getElementById("letter-count").textContent =
-    `${lettersUsed.size}/37`;
-}
-</script>
-
 <style>
-#alphabet div {
+.alphabet div {
     background-color: #f3f3f3;
     border-radius: 5px;
     margin: 0px -1px;
 }
 
-#alphabet div:hover {
+.alphabet div:hover {
     cursor: pointer;
 }
 </style>
 
-<table id="alphabet" style="width: 60%;">
+<table class="alphabet" style="width: 60%;">
   <colgroup>
+    {%- for i in (1..site.data.spelling.letters_per_row) -%}
     <col style="width: 14.2857142857%;"/>
-    <col style="width: 14.2857142857%;"/>
-    <col style="width: 14.2857142857%;"/>
-    <col style="width: 14.2857142857%;"/>
-    <col style="width: 14.2857142857%;"/>
-    <col style="width: 14.2857142857%;"/>
-    <col style="width: 14.2857142857%;"/>
+    {%- endfor -%}
+  </colgroup>
+  {% for letter_data in site.data.spelling.letters -%}
+    {%- assign rem = forloop.index0 | modulo: site.data.spelling.letters_per_row %}
+    {%- if rem == 0 %}<tr>{% endif -%}
+    <td><div onmouseover="update_letter_display('{{ letter_data[0] }}')">{{ letter_data[0] | upcase }}{{ letter_data[0] }}</div></td>
+    {%- assign i_1 = site.data.spelling.letters_per_row | minus: 1 -%}
+    {%- if rem == i_1 %}</tr>{% endif -%}
+  {% endfor %}
+  {% for diphthong_data in site.data.spelling.diphthongs -%}
+    {%- assign rem = forloop.index0 | modulo: site.data.spelling.letters_per_row %}
+    {%- if rem == 0 %}<tr>{% endif -%}
+    <td><div onmouseover="update_letter_display('{{ diphthong_data[0] }}')">{{ letter_data[0] | upcase }}{{ letter_data[0] }}</div></td>
+    {%- assign i_1 = site.data.spelling.letters_per_row | minus: 1 -%}
+    {%- if rem == i_1 %}</tr>{% endif -%}
+  {% endfor %}
+</table>
+
+<table style="width: 80%;">
+  <colgroup>
+    <col style="width: 35%;"/>
+    <col style="width: 35%;"/>
+    <col style="width: 30%;"/>
   </colgroup>
   <tr>
-    <td><div onmouseover="update_letter_display('Aa')">Aa</div></td>
-    <td><div onmouseover="update_letter_display('Áá')">Áá</div></td>
-    <td><div onmouseover="update_letter_display('Bb')">Bb</div></td>
-    <td><div onmouseover="update_letter_display('Cc')">Cc</div></td>
-    <td><div onmouseover="update_letter_display('Ćć')">Ćć</div></td>
-    <td><div onmouseover="update_letter_display('Dd')">Dd</div></td>
-    <td><div onmouseover="update_letter_display('Ðð')">Ðð</div></td>
+    <td rowspan="3" style="font-size: 350%" id="letters-display-big-letters"></td>
+    <th style="text-align: right">Sounds like&#8230;</th>
+    <td id="letters-display-sounds-like"></td>
   </tr>
   <tr>
-    <td><div onmouseover="update_letter_display('Ee')">Ee</div></td>
-    <td><div onmouseover="update_letter_display('Éé')">Éé</div></td>
-    <td><div onmouseover="update_letter_display('Ff')">Ff</div></td>
-    <td><div onmouseover="update_letter_display('Gg')">Gg</div></td>
-    <td><div onmouseover="update_letter_display('Ǵǵ')">Ǵǵ</div></td>
-    <td><div onmouseover="update_letter_display('Hh')">Hh</div></td>
-    <td><div onmouseover="update_letter_display('Ii')">Ii</div></td>
+    <th style="text-align: right">IPA</th>
+    <td id="letters-display-ipa"></td>
   </tr>
   <tr>
-    <td><div onmouseover="update_letter_display('Íí')">Íí</div></td>
-    <td><div onmouseover="update_letter_display('Jj')">Jj</div></td>
-    <td><div onmouseover="update_letter_display('Ll')">Ll</div></td>
-    <td><div onmouseover="update_letter_display('Łł')">Łł</div></td>
-    <td><div onmouseover="update_letter_display('Mm')">Mm</div></td>
-    <td><div onmouseover="update_letter_display('Nn')">Nn</div></td>
-    <td><div onmouseover="update_letter_display('Ńń')">Ńń</div></td>
+    <th style="text-align: right">Input</th>
+    <td><code>&ldquo;<span id="letters-display-input"></span>&rdquo;</code></td>
   </tr>
+</table>
+
+<textarea id="input"
+  placeholder="Ðy cłic brawn focs ǵumpt ywvy ðy leizí dog&#8230;"
+  oninput="addDiacritics()"
+  onkeypress="addDiacritics()"
+  rows="5">
+</textarea>
+
+<!-- <p>The double vowels are as follows:</p>
+
+<table class="alphabet" style="width: 60%;">
+  <colgroup>
+    {%- for diphthong_data in site.data.spelling.diphthongs -%}
+    <col style="width: 14.2857142857%;"/>
+    {%- endfor -%}
+  </colgroup>
   <tr>
-    <td><div onmouseover="update_letter_display('Oo')">Oo</div></td>
-    <td><div onmouseover="update_letter_display('Óó')">Óó</div></td>
-    <td><div onmouseover="update_letter_display('Pp')">Pp</div></td>
-    <td><div onmouseover="update_letter_display('Rr')">Rr</div></td>
-    <td><div onmouseover="update_letter_display('Ss')">Ss</div></td>
-    <td><div onmouseover="update_letter_display('Śś')">Śś</div></td>
-    <td><div onmouseover="update_letter_display('Tt')">Tt</div></td>
-  </tr>
-  <tr>
-    <td><div onmouseover="update_letter_display('Þþ')">Þþ</div></td>
-    <td><div onmouseover="update_letter_display('Uu')">Uu</div></td>
-    <td><div onmouseover="update_letter_display('Vv')">Vv</div></td>
-    <td><div onmouseover="update_letter_display('Ww')">Ww</div></td>
-    <td><div onmouseover="update_letter_display('Ẃẃ')">Ẃẃ</div></td>
-    <td><div onmouseover="update_letter_display('Yy')">Yy</div></td>
-    <td><div onmouseover="update_letter_display('Ýý')">Ýý</div></td>
-  </tr>
-  <tr>
-    <td><div onmouseover="update_letter_display('Zz')">Zz</div></td>
-    <td><div onmouseover="update_letter_display('Źź')">Źź</div></td>
+  {%- for diphthong_data in site.data.spelling.diphthongs -%}
+    <td><div onmouseover="update_letter_display('{{ diphthong_data[0] }}', 'diphthongs')">{{ diphthong_data[0] }}</div></td>
+  {% endfor %}
   </tr>
 </table>
 
@@ -208,33 +100,130 @@ const addDiacritics = () => {
     <col style="width: 30%;"/>
   </colgroup>
   <tr>
-    <td rowspan="3" style="font-size: 350%" id="letter-display-big-letters">Aa</td>
+    <td rowspan="2" style="font-size: 350%" id="diphthongs-display-big-letters"></td>
     <th style="text-align: right">Sounds like&#8230;</th>
-    <td id="letter-display-sounds-like">c<strong>a</strong>t</td>
+    <td id="diphthongs-display-sounds-like"></td>
   </tr>
   <tr>
     <th style="text-align: right">IPA</th>
-    <td id="letter-display-ipa">/æ/</td>
+    <td id="diphthongs-display-ipa"></td>
   </tr>
-  <tr>
-    <th style="text-align: right">Input</th>
-    <td><code>&ldquo;<span id="letter-display-input">a</span>&rdquo;</code></td>
-    </tr>
-</table>
+</table> -->
 
-<textarea id="input"
-  placeholder="Ðy cłic brawn focs ǵumpt ywvy ðy leizí dog&#8230;"
-  oninput="addDiacritics()"
-  onkeypress="addDiacritics()"
-  rows="5">
-</textarea>
 
-<p>Try to make a pangram! <span id="pangram">
-  <span>a</span><span>á</span><span>b</span><span>c</span><span>ć</span><span>d</span><span>ð</span><span>e</span><span>é</span><span>f</span><span>g</span><span>ǵ</span><span>h</span><span>i</span><span>í</span><span>j</span><span>l</span><span>ł</span><span>m</span><span>n</span><span>ń</span><span>o</span><span>ó</span><span>p</span><span>r</span><span>s</span><span>ś</span><span>t</span><span>þ</span><span>u</span><span>v</span><span>w</span><span>ẃ</span><span>y</span><span>ý</span><span>z</span><span>ź</span>
-</span><span id="letter-count">0/37</span></p>
+<script>
+const LETTERS = "{%- for letter_data in site.data.spelling.letters -%}{{ letter_data[0] }}{%- endfor -%}";
+const DISPLAY_DATA = {
+    "letters": {{ site.data.spelling.letters | jsonify }},
+    "diphthongs": {{ site.data.spelling.diphthongs | jsonify }},
+};
+
+/* Converts letter/diphthong data of the form in `_data/spelling.json` into
+a sequence of display letters, sounds-like string, IPA string, and optionally input type.
+*/
+const letter_data_to_info = (letter, letter_data, table_type) => {
+    const display_letter = letter.length == 1
+        ? `${letter.toUpperCase()}${letter}`
+        : `${letter}`;
+    const sounds_like = letter_data["pronunciations"]
+        .map(data => {
+            var word = data["example"];
+            var start = data["example_start"];
+            var end = data["example_end"];
+            return `${word.slice(0,start)}<strong>${word.slice(start,end)}</strong>${word.slice(end)}`;
+        }).join(", ");
+    const ipa = letter_data["pronunciations"].map(data => `/${data["ipa"]}/`).join(", ");
+    var result = {
+        "display_letter": display_letter,
+        "sounds_like":  sounds_like,
+        "ipa": ipa,
+    };
+    var modification = letter_data["modification_of"];
+    if (table_type == "letters") {
+        var is_mod = modification !== undefined && modification !== null;
+        result["input"] = is_mod ? `${modification}k` : letter;
+    }
+    return result;
+}
+
+const update_letter_display = (str, table_type) => {
+    const data = DISPLAY_DATA[table_type][str];
+    const letter_info = letter_data_to_info(str, data,
+        table_type);
+    document.getElementById(`${table_type}-display-big-letters`)
+        .innerText = letter_info["display_letter"];
+    document.getElementById(`${table_type}-display-sounds-like`)
+        .innerHTML = letter_info["sounds_like"];
+    document.getElementById(`${table_type}-display-ipa`)
+        .innerText = letter_info["ipa"];
+    if (table_type == "letters") {
+        document.getElementById(`${table_type}-display-input`)
+            .innerText = letter_info["input"];
+    }
+}
+
+update_letter_display("a", "letters");
+// update_letter_display("ai", "diphthongs");
+
+
+// const equalCaseInsensitive = (a,b) =>
+//     a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
+// const isUpper = (c) => c === c.toUpperCase();
+// const isLower = (c) => !isUpper(c);
+
+// const addDiacritics = () => {
+//     const box = document.getElementById("input");
+//     const text = box.value;
+//     var replacementText = [];
+//     if (text.length > 0 && !equalCaseInsensitive(text[0], "k")) {
+//         replacementText.push(text[0]);
+//     }
+//     for (var i = 1; i < text.length; i++) {
+//         const lastChar = text[i];
+//         const penultChar = text[i-1];
+//         if (equalCaseInsensitive(lastChar, "k")) {
+//             var replacement = diacriticLetters[penultChar.toUpperCase()];
+//             if (replacement !== undefined) {
+//                 if (isLower(penultChar)) {
+//                     replacement = replacement.toLowerCase();
+//                 }
+//                 replacementText.pop();
+//                 replacementText.push(replacement);
+//             }
+//         } else {
+//             replacementText.push(text[i]);
+//         }
+//     }
+//     replacementText = replacementText.join("");
+//     box.value = replacementText;
+
+//     // pangram stuff
+//     const lettersUsed = new Set();
+//     for (letter of replacementText) {
+//         var uLetter = letter.toUpperCase();
+//         if (lettersInAlphabet.has(uLetter)) {
+//             lettersUsed.add(uLetter);
+//         }
+//     }
+//     const alphabet = document.getElementById("pangram");
+//     for (tag of alphabet.children) {
+//         if (lettersUsed.has(tag.textContent.toUpperCase())) {
+//             tag.classList.add("colored");
+//         } else {
+//             tag.classList.remove("colored");
+//         }
+//     }
+//     document.getElementById("letter-count").textContent =
+//     `${lettersUsed.size}/37`;
+// }
+</script>
+
+
 
 <div style="height: 20em"></div>
 <h2>The details</h2>
+
+<!-- TODO: generate these and preferably hide them under a dropdown. -->
 
 (v0.3.0)
 
@@ -262,7 +251,7 @@ const addDiacritics = () => {
 <tr><td>D</td><td>d</td><td><strong>d</strong>uck</td><td>/d/</td></tr>
 <tr><td>Ð</td><td>ð</td><td><strong>th</strong>is</td><td>/ð/</td></tr>
 <tr><td>E</td><td>e</td><td>b<strong>e</strong>ll</td><td>/e/</td></tr>
-<tr><td>É</td><td>é</td><td>squ<strong>are</strong></td><td>/ɛə/</td></tr>
+<tr><td>É</td><td>é</td><td>squ<strong>are</strong></td><td>/eə/</td></tr>
 <tr><td>F</td><td>f</td><td><strong>f</strong>oil</td><td>/f/</td></tr>
 <tr><td>G</td><td>g</td><td><strong>g</strong>ain</td><td>/g/</td></tr>
 <tr><td>Ǵ</td><td>ǵ</td><td><strong>j</strong>oke</td><td>/dʒ/</td></tr>
@@ -315,7 +304,7 @@ Lastly:
 
 <ul>
 <li>Existing spelling conventions such as capitalised &ldquo;I&rdquo; and use of apostrophes are removed, but capitalisation and use of other punctuation remains unchanged, with the exception of guillemets for quotations as in French (&laquo; and &raquo;, or &lsaquo; and &rsaquo; for nested quotations).</li>
-<li>The sounds /tr/ and /dr/ as in &ldquo;<strong>tr</strong>ip&rdquo; and &ldquo;<strong>dr</strong>ag&rdquo; are written as &laquo;ćr&raquo; and &laquo;ǵr&raquo; respectively.</li>
+<li>The sounds /tr/ and /dr/ as in &ldquo;<strong>tr</strong>ip&rdquo; and &ldquo;<strong>dr</strong>ag&rdquo; are written as &laquo;ćr&raquo; and &laquo;ǵr&raquo; respectively. NB: not at all wedded to this.</li>
 <li>An apostrophe is used between adjacent vowels which could form a diphthong, but do not. For example, &ldquo;clawing&rdquo; is written &laquo;cló&#8217;iń&raquo;.</li>
 <li>English has five triphthongs, all of which are a diphthong + /ə/; no apostrophe is used between the constituent vowels.</li>
 <li>Syllabic consonants like the final syllables of mansion, chasm and handle are written with a <strong>y</strong> before the consonant: &laquo;manśyn&raquo;, &laquo;cazym&raquo;, &laquo;handyl&raquo;.</li>

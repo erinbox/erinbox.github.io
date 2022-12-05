@@ -1,0 +1,508 @@
+{
+    "letters_per_row": 7,
+    "letters": {
+        "a": {
+            "pronunciations": [
+                {
+                    "ipa": "æ",
+                    "example": "act",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "á": {
+            "pronunciations": [
+                {
+                    "ipa": "ɑː",
+                    "example": "yarn",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ],
+            "modification_of": "a"
+        },
+        "b": {
+            "pronunciations": [
+                {
+                    "ipa": "b",
+                    "example": "boy",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "c": {
+            "pronunciations": [
+                {
+                    "ipa": "",
+                    "example": "coat",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ć": {
+            "pronunciations": [
+                {
+                    "ipa": "tʃ",
+                    "example": "chase",
+                    "example_start": 0,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": "c"
+        },
+        "d": {
+            "pronunciations": [
+                {
+                    "ipa": "d",
+                    "example": "dog",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ð": {
+            "pronunciations": [
+                {
+                    "ipa": "ð",
+                    "example": "this",
+                    "example_start": 0,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": "d"
+        },
+        "e": {
+            "pronunciations": [
+                {
+                    "ipa": "e",
+                    "example": "bet",
+                    "example_start": 1,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": null
+        },
+        "é": {
+            "pronunciations": [
+                {
+                    "ipa": "eə",
+                    "example": "pair",
+                    "example_start": 1,
+                    "example_end": 4
+                }
+            ],
+            "modification_of": "e"
+        },
+        "f": {
+            "pronunciations": [
+                {
+                    "ipa": "f",
+                    "example": "fast",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "g": {
+            "pronunciations": [
+                {
+                    "ipa": "g",
+                    "example": "go",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ǵ": {
+            "pronunciations": [
+                {
+                    "ipa": "dʒ",
+                    "example": "joke",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": "g"
+        },
+        "h": {
+            "pronunciations": [
+                {
+                    "ipa": "h",
+                    "example": "hat",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "i": {
+            "pronunciations": [
+                {
+                    "ipa": "ɪ",
+                    "example": "kit",
+                    "example_start": 1,
+                    "example_end": 2
+                },
+                {
+                    "ipa": "ᵻ",
+                    "example": "honest",
+                    "example_start": 3,
+                    "example_end": 4
+                }
+            ],
+            "modification_of": null
+        },
+        "í": {
+            "pronunciations": [
+                {
+                    "ipa": "iː",
+                    "example": "reed",
+                    "example_start": 1,
+                    "example_end": 3
+                },
+                {
+                    "ipa": "i",
+                    "example": "happy",
+                    "example_start": 4,
+                    "example_end": 5
+                }
+            ],
+            "modification_of": "i"
+        },
+        "j": {
+            "pronunciations": [
+                {
+                    "ipa": "j",
+                    "example": "yes",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "l": {
+            "pronunciations": [
+                {
+                    "ipa": "l",
+                    "example": "lion",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ł": {
+            "pronunciations": [
+                {
+                    "ipa": "w",
+                    "example": "wind",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": "l"
+        },
+        "m": {
+            "pronunciations": [
+                {
+                    "ipa": "m",
+                    "example": "man",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "n": {
+            "pronunciations": [
+                {
+                    "ipa": "n",
+                    "example": "near",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ń": {
+            "pronunciations": [
+                {
+                    "ipa": "ŋ",
+                    "example": "sing",
+                    "example_start": 2,
+                    "example_end": 4
+                }
+            ],
+            "modification_of": "n"
+        },
+        "o": {
+            "pronunciations": [
+                {
+                    "ipa": "ɒ",
+                    "example": "dot",
+                    "example_start": 1,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": null
+        },
+        "ó": {
+            "pronunciations": [
+                {
+                    "ipa": "ɔː",
+                    "example": "born",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ],
+            "modification_of": "o"
+        },
+        "p": {
+            "pronunciations": [
+                {
+                    "ipa": "p",
+                    "example": "pin",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "r": {
+            "pronunciations": [
+                {
+                    "ipa": "r",
+                    "example": "rope",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "s": {
+            "pronunciations": [
+                {
+                    "ipa": "s",
+                    "example": "say",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ś": {
+            "pronunciations": [
+                {
+                    "ipa": "ʃ",
+                    "example": "sheet",
+                    "example_start": 0,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": "s"
+        },
+        "t": {
+            "pronunciations": [
+                {
+                    "ipa": "t",
+                    "example": "tap",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "þ": {
+            "pronunciations": [
+                {
+                    "ipa": "θ",
+                    "example": "thin",
+                    "example_start": 0,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": "t"
+        },
+        "u": {
+            "pronunciations": [
+                {
+                    "ipa": "ʌ",
+                    "example": "cup",
+                    "example_start": 1,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": null
+        },
+        "v": {
+            "pronunciations": [
+                {
+                    "ipa": "v",
+                    "example": "van",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "w": {
+            "pronunciations": [
+                {
+                    "ipa": "ʊ",
+                    "example": "book",
+                    "example_start": 1,
+                    "example_end": 3
+                },
+                {
+                    "ipa": "ᵿ",
+                    "example": "July",
+                    "example_start": 1,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": null
+        },
+        "ẃ": {
+            "pronunciations": [
+                {
+                    "ipa": "uː",
+                    "example": "goose",
+                    "example_start": 1,
+                    "example_end": 3
+                },
+                {
+                    "ipa": "u",
+                    "example": "actual",
+                    "example_start": 3,
+                    "example_end": 4
+                }
+            ],
+            "modification_of": "w"
+        },
+        "y": {
+            "pronunciations": [
+                {
+                    "ipa": "ə",
+                    "example": "enter",
+                    "example_start": 3,
+                    "example_end": 5
+                }
+            ],
+            "modification_of": null
+        },
+        "ý": {
+            "pronunciations": [
+                {
+                    "ipa": "ɜː",
+                    "example": "burn",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ],
+            "modification_of": "y"
+        },
+        "z": {
+            "pronunciations": [
+                {
+                    "ipa": "z",
+                    "example": "zoo",
+                    "example_start": 0,
+                    "example_end": 1
+                }
+            ],
+            "modification_of": null
+        },
+        "ź": {
+            "pronunciations": [
+                {
+                    "ipa": "ʒ",
+                    "example": "measure",
+                    "example_start": 3,
+                    "example_end": 4
+                }
+            ],
+            "modification_of": "z"
+        }
+    },
+    "diphthongs": {
+        "ai": {
+            "pronunciations": [
+                {
+                    "ipa": "aɪ",
+                    "example": "tie",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ]
+        },
+        "aw": {
+            "pronunciations": [
+                {
+                    "ipa": "aʊ",
+                    "example": "mouth",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ]
+        },
+        "ei": {
+            "pronunciations": [
+                {
+                    "ipa": "eɪ",
+                    "example": "vein",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ]
+        },
+        "iy": {
+            "pronunciations": [
+                {
+                    "ipa": "ɪə",
+                    "example": "here",
+                    "example_start": 1,
+                    "example_end": 4
+                }
+            ]
+        },
+        "ói": {
+            "pronunciations": [
+                {
+                    "ipa": "ɔɪ",
+                    "example": "choice",
+                    "example_start": 2,
+                    "example_end": 4
+                }
+            ]
+        },
+        "wy": {
+            "pronunciations": [
+                {
+                    "ipa": "ʊə",
+                    "example": "cure",
+                    "example_start": 1,
+                    "example_end": 4
+                }
+            ]
+        },
+        "yw": {
+            "pronunciations": [
+                {
+                    "ipa": "əʊ",
+                    "example": "goat",
+                    "example_start": 1,
+                    "example_end": 3
+                }
+            ]
+        }
+    }
+}

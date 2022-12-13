@@ -4,7 +4,12 @@ layout: default
 category: language
 ---
 
-<table>
+<table style="width: 50%">
+  <colgroup>
+    <col style="width: 40%;"/>
+    <col style="width: 20%;"/>
+    <col style="width: 40%;"/>
+  </colgroup>
   <tr><td>rough</td><td>&#8594;</td><td>ruf</td></tr>
   <tr><td>fair</td><td>&#8594;</td><td>fé</td></tr>
   <tr><td>cheese</td><td>&#8594;</td><td>ćíz</td></tr>
@@ -14,11 +19,11 @@ category: language
 
 <h2>In short</h2>
 
-A one-to-one mapping between English phonemes and letters, much like the successful reform of Czech orthography proposed by Jan Hus in <em><a href="https://en.wikipedia.org/wiki/Orthographia_bohemica" target="_blank" rel="noreferrer">De orthographia bohemica</a></em>. Mouse over a letter to see how it sounds:
+A one-to-one mapping between English phonemes and letters, much like Jan Hus&#8217; reform of Czech orthography described in <em><a href="https://en.wikipedia.org/wiki/Orthographia_bohemica" target="_blank" rel="noreferrer">De orthographia bohemica</a></em>. The {{ site.data.spelling.letters | where: "is_vowel", false | size }} consonants and {{ site.data.spelling.letters | where: "is_vowel", true | size }} vowels of the alphabet are given below, along with the {{ site.data.spelling.diphthongs | size }} double vowels:
 
 <style>
 .alphabet div {
-    background-color: #f3f3f3;
+    background-color: #f0f0f0;
     border-radius: 5px;
     margin: 0px -1px;
 }
@@ -28,10 +33,57 @@ A one-to-one mapping between English phonemes and letters, much like the success
 }
 </style>
 
+<script>
+var DIACRITIC_LETTERS = {{- site.data.spelling.letters | jsonify -}};
+DIACRITIC_LETTERS = Object.keys(DIACRITIC_LETTERS)
+    .reduce((acc, letter) => {
+        const mod = DIACRITIC_LETTERS[letter]["modification_of"];
+        if (mod !== null && mod !== undefined) {
+            acc[mod] = letter;
+        }
+        return acc;
+    }, {});
+
+
+const equalCaseInsensitive = (a,b) =>
+    a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
+const isUpper = (c) => c === c.toUpperCase();
+const isLower = (c) => !isUpper(c);
+
+const addDiacritics = () => {
+    const text_area = document.getElementById("input");
+    const contents = text_area.value;
+    const cursor_pos = text_area.selectionEnd;
+    console.log(contents, cursor_pos);
+    if (cursor_pos > 0 && equalCaseInsensitive(contents[cursor_pos-1], "{{ site.data.spelling.accent_key }}")) {
+        var cased_letter;
+        if (cursor_pos > 1) {
+            const unmodified_letter = contents[cursor_pos-2];
+            const letter = DIACRITIC_LETTERS[unmodified_letter.toLowerCase()];
+            cased_letter = letter === undefined ? "" :
+                isUpper(unmodified_letter) ? letter.toUpperCase() : letter;
+        }
+        else {
+            cased_letter = "";
+        }
+        const start_up_to = cased_letter === ""
+            ? cursor_pos - 1
+            : cursor_pos - 2;
+        const start = contents.slice(0, start_up_to);
+        const end = contents.slice(cursor_pos);
+        const new_contents = `${start}${cased_letter}${end}`;
+        text_area.value = new_contents;
+        text_area.selectionEnd = cursor_pos - 1;
+    }
+}
+</script>
+
 <table class="alphabet" style="width: 60%;">
   <colgroup>
+    {%- assign length = site.data.spelling.letters_per_row -%}
+    {%- assign width = 100 | divided_by: length -%}
     {%- for i in (1..site.data.spelling.letters_per_row) -%}
-    <col style="width: 14.2857142857%;"/>
+    <col style="width: {{ width }}%;"/> <!-- generate the width % -->
     {%- endfor -%}
   </colgroup>
   {% for letter_data in site.data.spelling.letters -%}
@@ -41,10 +93,11 @@ A one-to-one mapping between English phonemes and letters, much like the success
     {%- assign i_1 = site.data.spelling.letters_per_row | minus: 1 -%}
     {%- if rem == i_1 %}</tr>{% endif -%}
   {% endfor %}
+  <tr style="height: 0.4em;"></tr>
   {% for diphthong_data in site.data.spelling.diphthongs -%}
     {%- assign rem = forloop.index0 | modulo: site.data.spelling.letters_per_row %}
     {%- if rem == 0 %}<tr>{% endif -%}
-    <td><div onmouseover="update_letter_display('{{ diphthong_data[0] }}')">{{ letter_data[0] | upcase }}{{ letter_data[0] }}</div></td>
+    <td><div onmouseover="update_letter_display('{{ diphthong_data[0] }}')">{{ diphthong_data[0] }}</div></td>
     {%- assign i_1 = site.data.spelling.letters_per_row | minus: 1 -%}
     {%- if rem == i_1 %}</tr>{% endif -%}
   {% endfor %}
@@ -72,50 +125,25 @@ A one-to-one mapping between English phonemes and letters, much like the success
 </table>
 
 <textarea id="input"
-  placeholder="Ðy cłic brawn focs ǵumpt ywvy ðy leizí dog&#8230;"
+  placeholder="Trai taipiń hiy&#8230;"
   oninput="addDiacritics()"
   onkeypress="addDiacritics()"
   rows="5">
 </textarea>
 
-<!-- <p>The double vowels are as follows:</p>
+<p>Some example sentences:</p>
 
-<table class="alphabet" style="width: 60%;">
-  <colgroup>
-    {%- for diphthong_data in site.data.spelling.diphthongs -%}
-    <col style="width: 14.2857142857%;"/>
-    {%- endfor -%}
-  </colgroup>
-  <tr>
-  {%- for diphthong_data in site.data.spelling.diphthongs -%}
-    <td><div onmouseover="update_letter_display('{{ diphthong_data[0] }}', 'diphthongs')">{{ diphthong_data[0] }}</div></td>
-  {% endfor %}
-  </tr>
-</table>
-
-<table style="width: 80%;">
-  <colgroup>
-    <col style="width: 35%;"/>
-    <col style="width: 35%;"/>
-    <col style="width: 30%;"/>
-  </colgroup>
-  <tr>
-    <td rowspan="2" style="font-size: 350%" id="diphthongs-display-big-letters"></td>
-    <th style="text-align: right">Sounds like&#8230;</th>
-    <td id="diphthongs-display-sounds-like"></td>
-  </tr>
-  <tr>
-    <th style="text-align: right">IPA</th>
-    <td id="diphthongs-display-ipa"></td>
-  </tr>
-</table> -->
-
+<ul>
+  <li>Ðy cłic brawn focs ǵumpt ywvy ðy leizí dog.</li>
+  <li>Iuventius, if ai łý ólłeiz ylawd / ty cis jó huní-słít aiz&#8230;</li>
+  <li>Ðen felt ai laic sum łoćy ov ðy scaiz / Łen y njẃ planit słimz intẃ hiz cen;</li>
+</ul>
 
 <script>
 const LETTERS = "{%- for letter_data in site.data.spelling.letters -%}{{ letter_data[0] }}{%- endfor -%}";
 const DISPLAY_DATA = {
     "letters": {{ site.data.spelling.letters | jsonify }},
-    "diphthongs": {{ site.data.spelling.diphthongs | jsonify }},
+    "diphthongs": {{ site.data.spelling.diphthongs | jsonify }}
 };
 
 /* Converts letter/diphthong data of the form in `_data/spelling.json` into
@@ -133,89 +161,35 @@ const letter_data_to_info = (letter, letter_data, table_type) => {
             return `${word.slice(0,start)}<strong>${word.slice(start,end)}</strong>${word.slice(end)}`;
         }).join(", ");
     const ipa = letter_data["pronunciations"].map(data => `/${data["ipa"]}/`).join(", ");
-    var result = {
+    return {
         "display_letter": display_letter,
         "sounds_like":  sounds_like,
         "ipa": ipa,
+        "input": [...letter]
+        .map(l => {
+            const data = DISPLAY_DATA["letters"][l];
+            var mod = data["modification_of"];
+            return mod === undefined || mod === null ? l : `${mod}{{ site.data.spelling.accent_key }}`;
+        }).join(""),
     };
-    var modification = letter_data["modification_of"];
-    if (table_type == "letters") {
-        var is_mod = modification !== undefined && modification !== null;
-        result["input"] = is_mod ? `${modification}k` : letter;
-    }
-    return result;
 }
 
-const update_letter_display = (str, table_type) => {
+const update_letter_display = (str) => {
+    const table_type = str.length == 1 ? "letters" : "diphthongs";
     const data = DISPLAY_DATA[table_type][str];
     const letter_info = letter_data_to_info(str, data,
         table_type);
-    document.getElementById(`${table_type}-display-big-letters`)
+    document.getElementById(`letters-display-big-letters`)
         .innerText = letter_info["display_letter"];
-    document.getElementById(`${table_type}-display-sounds-like`)
+    document.getElementById(`letters-display-sounds-like`)
         .innerHTML = letter_info["sounds_like"];
-    document.getElementById(`${table_type}-display-ipa`)
+    document.getElementById(`letters-display-ipa`)
         .innerText = letter_info["ipa"];
-    if (table_type == "letters") {
-        document.getElementById(`${table_type}-display-input`)
-            .innerText = letter_info["input"];
-    }
+    document.getElementById(`letters-display-input`)
+        .innerText = letter_info["input"];
 }
 
-update_letter_display("a", "letters");
-// update_letter_display("ai", "diphthongs");
-
-
-// const equalCaseInsensitive = (a,b) =>
-//     a.localeCompare(b, "en", { sensitivity: "accent"}) === 0;
-// const isUpper = (c) => c === c.toUpperCase();
-// const isLower = (c) => !isUpper(c);
-
-// const addDiacritics = () => {
-//     const box = document.getElementById("input");
-//     const text = box.value;
-//     var replacementText = [];
-//     if (text.length > 0 && !equalCaseInsensitive(text[0], "k")) {
-//         replacementText.push(text[0]);
-//     }
-//     for (var i = 1; i < text.length; i++) {
-//         const lastChar = text[i];
-//         const penultChar = text[i-1];
-//         if (equalCaseInsensitive(lastChar, "k")) {
-//             var replacement = diacriticLetters[penultChar.toUpperCase()];
-//             if (replacement !== undefined) {
-//                 if (isLower(penultChar)) {
-//                     replacement = replacement.toLowerCase();
-//                 }
-//                 replacementText.pop();
-//                 replacementText.push(replacement);
-//             }
-//         } else {
-//             replacementText.push(text[i]);
-//         }
-//     }
-//     replacementText = replacementText.join("");
-//     box.value = replacementText;
-
-//     // pangram stuff
-//     const lettersUsed = new Set();
-//     for (letter of replacementText) {
-//         var uLetter = letter.toUpperCase();
-//         if (lettersInAlphabet.has(uLetter)) {
-//             lettersUsed.add(uLetter);
-//         }
-//     }
-//     const alphabet = document.getElementById("pangram");
-//     for (tag of alphabet.children) {
-//         if (lettersUsed.has(tag.textContent.toUpperCase())) {
-//             tag.classList.add("colored");
-//         } else {
-//             tag.classList.remove("colored");
-//         }
-//     }
-//     document.getElementById("letter-count").textContent =
-//     `${lettersUsed.size}/37`;
-// }
+update_letter_display("{%- assign firstLetterInfo = site.data.spelling.letters | first -%}{{ firstLetterInfo[0] }}", "letters");
 </script>
 
 
@@ -227,84 +201,11 @@ update_letter_display("a", "letters");
 
 (v0.3.0)
 
-<p>I propose a simple phonemic orthography much like the successful reform of Czech orthography proposed by Jan Hus in <em><a href="https://en.wikipedia.org/wiki/Orthographia_bohemica">De orthographia bohemica</a></em>. Each phoneme of British Received Pronunciation English (the standard used in British dictionaries) maps to a single letter.</p>
-
-<h2>Letters</h2>
-<p>There are 13 vowels and 24 consonants as follows:</p>
-
-<table style="width: 80%">
-<colgroup>
-  <col style="width: 2%"/>
-  <col style="width: 2%"/>
-  <col style="width: 35%"/>
-  <col style="width: 25%"/>
-</colgroup>
-<thead>
-<tr><th colspan="2">Letter</th><th>Sound</th><th>IPA</th></tr>
-</thead>
-<tbody>
-<tr><td>A</td><td>a</td><td><strong>a</strong>nt</td><td>/æ/</td></tr>
-<tr><td>Á</td><td>á</td><td>b<strong>ar</strong>n</td><td>/ɑː/</td></tr>
-<tr><td>B</td><td>b</td><td><strong>b</strong>ed</td><td>/b/</td></tr>
-<tr><td>C</td><td>c</td><td><strong>c</strong>ap</td><td>/k/</td></tr>
-<tr><td>Ć</td><td>ć</td><td><strong>ch</strong>in</td><td>/tʃ/</td></tr>
-<tr><td>D</td><td>d</td><td><strong>d</strong>uck</td><td>/d/</td></tr>
-<tr><td>Ð</td><td>ð</td><td><strong>th</strong>is</td><td>/ð/</td></tr>
-<tr><td>E</td><td>e</td><td>b<strong>e</strong>ll</td><td>/e/</td></tr>
-<tr><td>É</td><td>é</td><td>squ<strong>are</strong></td><td>/eə/</td></tr>
-<tr><td>F</td><td>f</td><td><strong>f</strong>oil</td><td>/f/</td></tr>
-<tr><td>G</td><td>g</td><td><strong>g</strong>ain</td><td>/g/</td></tr>
-<tr><td>Ǵ</td><td>ǵ</td><td><strong>j</strong>oke</td><td>/dʒ/</td></tr>
-<tr><td>H</td><td>h</td><td><strong>h</strong>ouse</td><td>/h/</td></tr>
-<tr><td>I</td><td>i</td><td>k<strong>i</strong>t, hon<strong>e</strong>st</td><td>/ɪ/, /ᵻ/</td></tr>
-<tr><td>Í</td><td>í</td><td>fl<strong>ee</strong>ce, happ<strong>y</strong></td><td>/iː/, /i/</td></tr>
-<tr><td>J</td><td>j</td><td><strong>y</strong>es</td><td>/j/</td></tr>
-<tr><td>L</td><td>l</td><td><strong>l</strong>imp</td><td>/l/</td></tr>
-<tr><td>Ł</td><td>ł</td><td><strong>w</strong>alk</td><td>/w/</td></tr>
-<tr><td>M</td><td>m</td><td><strong>m</strong>aze</td><td>/m/</td></tr>
-<tr><td>N</td><td>n</td><td><strong>n</strong>ight</td><td>/n/</td></tr>
-<tr><td>Ń</td><td>ń</td><td>si<strong>ng</strong>er</td><td>/ŋ/</td></tr>
-<tr><td>O</td><td>o</td><td>l<strong>o</strong>t</td><td>/ɒ/</td></tr>
-<tr><td>Ó</td><td>ó</td><td>h<strong>aw</strong>k</td><td>/ɔː/</td></tr>
-<tr><td>P</td><td>p</td><td><strong>p</strong>ink</td><td>/p/</td></tr>
-<tr><td>R</td><td>r</td><td><strong>r</strong>ung</td><td>/r/</td></tr>
-<tr><td>S</td><td>s</td><td><strong>s</strong>ail</td><td>/s/</td></tr>
-<tr><td>Ś</td><td>ś</td><td><strong>sh</strong>ip</td><td>/ʃ/</td></tr>
-<tr><td>T</td><td>t</td><td><strong>t</strong>in</td><td>/t/</td></tr>
-<tr><td>Þ</td><td>þ</td><td><strong>th</strong>in</td><td>/θ/</td></tr>
-<tr><td>U</td><td>u</td><td>c<strong>u</strong>p</td><td>/ʌ/</td></tr>
-<tr><td>V</td><td>v</td><td><strong>v</strong>iew</td><td>/v/</td></tr>
-<tr><td>W</td><td>w</td><td>f<strong>oo</strong>t, J<strong>u</strong>ly</td><td>/ʊ/, /ᵿ/</td></tr>
-<tr><td>Ẃ</td><td>ẃ</td><td>g<strong>oo</strong>se, sit<strong>u</strong>ation</td><td>/uː/, /u/</td></tr>
-<tr><td>Y</td><td>y</td><td>ent<strong>er</strong></td><td>/ə/</td></tr>
-<tr><td>Ý</td><td>ý</td><td>n<strong>ur</strong>se</td><td>/ɜː/</td></tr>
-<tr><td>Z</td><td>z</td><td><strong>z</strong>ero</td><td>/z/</td></tr>
-<tr><td>Ź</td><td>ź</td><td>mea<strong>s</strong>ure</td><td>/ʒ/</td></tr>
-</tbody>
-</table>
-
-There are also 7 double vowels, also known as diphthongs, which are spelt with their two constituent vowels put together. Some of the vowels may sound different depending on your dialect; for example, I speak a dialect which merges <strong>u</strong>/<strong>w</strong> and <strong>wu</strong>/<strong>ó</strong>.
-
-<table>
-<thead>
-<tr><th>Letters</th><th>Sound</th><th>IPA</th></tr>
-</thead>
-<tbody>
-<tr><td>ai</td><td>p<strong>i</strong>n<strong>e</strong></td><td>/aɪ/</td></tr>
-<tr><td>aw</td><td>m<strong>ou</strong>th</td><td>/aʊ/</td></tr>
-<tr><td>ei</td><td>d<strong>ay</strong></td><td>/eɪ/</td></tr>
-<tr><td>iy</td><td>h<strong>ere</strong></td><td>/ɪə/</td></tr>
-<tr><td>ói</td><td>ch<strong>oi</strong>ce</td><td>/ɔɪ/</td></tr>
-<tr><td>wy</td><td>c<strong>ure</strong></td><td>/ʊə/</td></tr>
-<tr><td>yw</td><td>g<strong>oa</strong>t</td><td>/əʊ/</td></tr></tr>
-</tbody>
-</table>
-
-Lastly:
+<p>Each phoneme of British Received Pronunciation English (the standard used in British dictionaries) maps to a single letter.</p>
 
 <ul>
 <li>Existing spelling conventions such as capitalised &ldquo;I&rdquo; and use of apostrophes are removed, but capitalisation and use of other punctuation remains unchanged, with the exception of guillemets for quotations as in French (&laquo; and &raquo;, or &lsaquo; and &rsaquo; for nested quotations).</li>
-<li>The sounds /tr/ and /dr/ as in &ldquo;<strong>tr</strong>ip&rdquo; and &ldquo;<strong>dr</strong>ag&rdquo; are written as &laquo;ćr&raquo; and &laquo;ǵr&raquo; respectively. NB: not at all wedded to this.</li>
+<!-- <li>The sounds /tr/ and /dr/ as in &ldquo;<strong>tr</strong>ip&rdquo; and &ldquo;<strong>dr</strong>ag&rdquo; are written as &laquo;ćr&raquo; and &laquo;ǵr&raquo; respectively. NB: not at all wedded to this.</li> -->
 <li>An apostrophe is used between adjacent vowels which could form a diphthong, but do not. For example, &ldquo;clawing&rdquo; is written &laquo;cló&#8217;iń&raquo;.</li>
 <li>English has five triphthongs, all of which are a diphthong + /ə/; no apostrophe is used between the constituent vowels.</li>
 <li>Syllabic consonants like the final syllables of mansion, chasm and handle are written with a <strong>y</strong> before the consonant: &laquo;manśyn&raquo;, &laquo;cazym&raquo;, &laquo;handyl&raquo;.</li>
@@ -321,5 +222,5 @@ Lastly:
 </blockquote>
 <blockquote>
 <h3>Ðy Nóþ Łind and ðy Sun</h3>
-<p>Ðy Nóþ Łind and ðy Sun łý dispjẃtiń łić łoz ðy sćrońgy, łen y ćravyly ceim yloń rapt in y łóm clywk. Ðei ygríd ðat ðy łun hẃ fýst sucsídyd in meicing ðy ćravyly teic hiz clywk of śud bí cynsidyd sćrońgy ðan ðí uðy. Ðen ðy Nóþ Łind blẃ az hád az hí cwd, but ðy mó hí blẃ ðy mó clywslí did ðy ćravyly fywld hiz clywc yrawnd him; and at lást ðy Nóþ Łind geiv up ðí ytempt. Ðen ðy Sun śaind awt łómlí, and imídíytly ðy ćravyly twc of hiz clywc. And syw ðy Nóþ Łind łoz yblaiǵd tẃ cynfes ðat ðy Sun łoz ðy sćrońgy ov ðy tẃ.</p>
+<p>Ðy Nóþ Łind and ðy Sun łý dispjẃtiń łić łoz ðy strońgy, łen y travyly ceim yloń rapt in y łóm clywk. Ðei ygríd ðat ðy łun hẃ fýst sucsídyd in meicing ðy travyly teic hiz clywk of śud bí cynsidyd strońgy ðan ðí uðy. Ðen ðy Nóþ Łind blẃ az hád az hí cwd, but ðy mó hí blẃ ðy mó clywslí did ðy travyly fywld hiz clywc yrawnd him; and at lást ðy Nóþ Łind geiv up ðí ytempt. Ðen ðy Sun śaind awt łómlí, and imídíytly ðy travyly twc of hiz clywc. And syw ðy Nóþ Łind łoz yblaiǵd tẃ cynfes ðat ðy Sun łoz ðy strońgy ov ðy tẃ.</p>
 </blockquote>

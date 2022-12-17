@@ -94,7 +94,7 @@ $monospaced-font:
              "Fira Mono", 
              "Droid Sans Mono", 
              "Courier New", monospace;
-$body-text-size: 23px;
+$body-text-size: 21px;
 $body-line-spacing: 1.45;
 $bg-color: #FFFFFF;
 $text-color: #000000;
@@ -124,7 +124,7 @@ body {
     color: $text-color;
     background-color: $bg-color;
     line-height: $body-line-spacing;
-    max-width: 650px;
+    max-width: 580px;
     margin: 50px auto 220px auto;
     font-feature-settings: "liga";
     // @include hyphenate;
@@ -238,7 +238,7 @@ sig {
     font-size: 105%;
     @include small-caps;
     text-align: right;
-    margin-bottom: 25px;
+    margin-bottom: 24px;
 }
 
 sig::before { content: "—" }
@@ -255,7 +255,20 @@ textarea { resize: none; width: 100%;
     margin: 1.5em auto;
 }
 
+footer {
+    font-size: $body-text-size * 0.9;
+}
+
 code {
     font-family: $monospaced-font;
     font-size: $body-text-size * 0.9;
 }
+
+hr.hr-footer {
+    margin-top: 6em;
+    margin-bottom: 1.6em;
+}
+
+// hr.hr-footer::after {
+//     content: "⁂";
+// }

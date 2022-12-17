@@ -1,0 +1,25 @@
+---
+title: Why I think the Tromp&ndash;Taylor rules of go are ideal and should be adopted everywhere
+layout: default
+category: go
+---
+
+<p>The game of go is known for its extremely simple rules&mdash;it's one of the simplest games you could come up with &mdash;but emergent complexity like chess, with human masters dedicating their lives to the game's study. Unfortunately, the game of go is also known for having five or so ever-so-slightly different rulesets, each disagreeing about the scoring system(!) and various rare edge cases, and each prevalent in different countries. Not only this, but some of these major rulesets are vague or even undefined in edge cases, relying on a ruling from a tribunal! This confusion has been known to turn away beginners from the game since players often struggle to explain how the score works without bringing in questions of ruleset and edge cases and so on.</p>
+<p>How can a game famous for such simple rules possess all this accidental complexity? I will discuss this and argue that the Tromp&ndash;Taylor rules of go make the ideal choice in every case of rules dispute and should be adopted globally.</p>
+
+<h2>In what ways do go rulesets differ?</h2>
+
+<p>If go is famously so simple that nothing can be added or removed, how can a </p>
+
+<h2>Area vs. territory</h2>
+
+<p>The biggest difference in ruleset is the method of scoring. <em>Area scoring</em>, used in China, is defined as follows: once both players pass, if they agree on dead stones to remove beforehand, their score is the sum of the number of their stones on the board (which I'll call \(S\) for stones) plus the number of empty intersections whose connected group is bordered only by stones of their colour (which I'll call \(T\) for territory). If they don't agree on which stones are dead, they simply keep playing as neither player passed.</p>
+<p><em>Territory scoring</em>, used in Japan and Korea, is defined differently: once both players pass, if they agree on dead stones to remove beforehand, their score is \(T\) as defined above, minus the number of &ldquo;prisoners&rdquo; \(P\) they captured during the game. This is usually worked out in practice by both players placing their prisoners in their opponent's territory, reducing \(T\).</p>
+<p>If a player played \(M\) moves before passing, we have the relationship \(M=S+P\). Since in practice players tend to only pass once there is nothing to do, both players are likely to have either the same number of moves, or Black going first to have had one more. Therefore, in normal play the scoring systems should only differ by at most one point. What's the problem then?</p>
+<p>The problem occurs when two players playing by territory scoring disagree on which stones are dead. Because playing in your own territory reduces your score by a point, the players cannot simply play on if they disagree on which stones are dead, as both would refuse. The solution of territory scoring is to have a special dispute phase depending on hypothetical perfect play (which we can't even know) combined with a hodge-podge of exceptions, Byzantine rules, special cases, and entirely undefined concepts that are not meaningful in the general case&mdash;no formulation of this phase is even clearly defined in all cases, let alone adjudicable in practice. In the words of Reddit user: TODO</p>
+<p>Another way to put this is that in area scoring, agreeing to remove dead stones beforehand is just a shortcut, a sensible procedure even beginners instinctively realise is easier than waiting for un-saveable stones to be captured. In territory scoring, on the other hand, this agreement phase becomes a separate part of the game with its own rules, differing in a number of edge cases from the &ldquo;real&rdquo; game, and which is in edge cases either undefined (so a Go tribunal has to make up a decision) or unadjudicable (because it relies on perfect play of potentially arbitrarily long sequences).</p>
+<p>There is only one correct solution to this madness, and it's to use area scoring.</p>
+
+<h2>Self-capture</h2>
+<p>Should you be able to play a stone that just gets it, and potentially more stones, captured straight away? Most rulesets ban this, but some, such as Taiwanese or New Zealand, don't.</p>
+<p>Every beginner I've ever seen play the game has had an instinctive and obvious understanding of what would happen if they played a self-capture move, and without explicitly ruling it out, most assume it's legal and consistent with the rules. So there can be no argument that it's unnatural. The ultimate reason I think it's important it be allowed is because there are extremely rare situations where it is actually useful as a ko threat.</p>

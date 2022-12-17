@@ -1,0 +1,39 @@
+---
+title: Some thoughts on computability
+layout: default
+category: maths
+---
+
+<p>I was reading Robert Soare&#8217;s paper <a href="http://www.people.cs.uchicago.edu/~soare/History/compute.pdf" target="_blank" rel="noreferrer"><em>Computability and Recursion</em></a> and had some thoughts about it I wanted to jot down. I was deeply impressed by it and would recommend giving it a read.</p>
+
+<p>I strongly agree with his thesis that we should preserve the intensional distinction between the concepts of computability and recursion, as well as his arguments both practical and theoretical for using the word &ldquo;computable&rdquo; often where it is not.</p>
+
+<p>Define a function \(f : \mathbb{N} \to \mathbb{N}\) as <em>computable</em> if there exists an effective procedure in the real</p>
+
+<p>There are various perspectives on the Church&ndash;Turing thesis, some mutually exclusive, others not:</p>
+
+<ul>
+  <p>Any of the various equivalent definitions (Turing-computability, \(\lambda\)-definability, general-recursiveness) can be taken as a satisfactory definition of what computability is.</p>
+  <p>The Turing machine is specifically superior to other definitions because of its alignment with intuition and <em>Turing&#8217;s theorem</em> that computorable functions are Turing computable (see page 11 of <em>Computability and Recursion</em>) and should be taken as <em>the</em> definition of computability in as strong a sense as, say, the \(\varepsilon\)&ndash;\(\delta\) definition of continuity can be a definition of continuity without empirical observation. Gödel strongly believed this.</p>
+  <p></p>
+  <p>The thesis is essentially an empirical statement about the nature of effective computability. This perspective was believed by Emil Post, though Church sharply criticised the idea.</p>
+  <p>The statement is in some way inherently true, but not in an empirical sense.</p>
+  <p>It&#8217;s definitely not true and we&#8217;ve just not found the better effective procedure yet (I have seen people argue this)</p>
+</ul>
+
+
+
+<p>Gödel believed that the Turing machine is specifically superior to other definitions because of its alignment with intuition and <em>Turing&#8217;s theorem</em> that computorable functions are Turing computable (see page 11 of <em>Computability and Recursion</em>) and should be taken as <em>the</em> definition of computability in as strong a sense as, say, the \(\varepsilon\)&ndash;\(\delta\) definition of continuity can be a definition of continuity without empirical observation.</p>
+
+<p>Soare quotes Kleene: “Turing’s computability is intrinsically persuasive” but “λ-definability is not intrinsically persuasive” and “general recursiveness scarcely so (its author Gödel being at the time not at all persuaded).”</p>
+
+
+Soare 3.4: interesting
+
+<p>Though I think I&#8217;ve been successfully persuaded that machine-based models are in some sense a much more satisfactory notion of <em>what it means to compute</em> than \(\lambda\)-definable functions or general recursive functions, I can&#8217;t agree with Soare&#8217;s argument that Turing-computability can be considered a definition akin to the \(\varepsilon\)&ndash;\(\delta\) definition of continuity or limit definitions of the lengths of curves because I believe think that, were some ingenious effective procedure discovered more powerful than Turing machines, we would surely consider the functions it can calculate as computable if that word is to have any real-world meaning and obsolete our current concept of $\mathbf{R}$. Therefore I think I would have to agree with Emil Post that in some sense the thesis is an empirical law, though it&#8217;s complicated by the fact that it seems unimaginable for us to be able to compute something in the real world that a symbol-pushing system like Turing machines cannot. Maybe there&#8217;s something to be found in the depths of physics, but I know nothing about that.</p>
+
+<p>A second difficulty I have with the acceptance of Turing machines as a definition of computability is that in some ways it&#8217;s undeniably rather clumsy and unsatisfactory. The examples of a definition of a length of a curve is the only sensible definition; the definition of limit isn&#8217;t so easy to dismiss as an analogy, but I think it still fails to be analogous in the limited sense that the \(\varepsilon\)&ndash;\(\delta\) definition TODO: THINK MORE ABOUT THIS. I&#8217;ve often suspected that the presentation of Turing machines as both writing a symbol to the tape and moving, rather than exclusively one or the other as might seem more natural fundamental operations, is a symptom of the unwieldy nature of expressing sum type constructs in traditional mathematical notation. Somewhere in my notes I have an essay comparing the traditional presentation of the primitive-recursive functions with a much more elegant definition just using cons-lists. (I hope that more notation from functional programming finds its way into bread-and-butter maths notation, and I think proof assistants like Coq and Lean are the most promising route through which this can come about.)</p>
+
+<p>Something I&#8217;ve wanted to see for a while is a model of computation equivalent in power to Turing machines which can in some sense said to be canonical. (In practice, Turing machines are treated as canonical generally, but I&#8217;m absolutely convinced this is due to history rather than every detail of Turing machine operation being perfect.) Perhaps there isn&#8217;t one because there are too many arbitrary options with no principled way to choose which.</p>
+
+<p>A related question: is it more elegant for the symbol set \(Q\) of a Turing machine to have any natural number of elements (as in Turing&#8217;s original presentation) or only two (as in Post&#8217;s formulation)? To what extent are number base systems reasonably analogous? (I&#8217;m not convinced they are: consider base-1&mdash;legitimate&mdash;vs \(|Q| = 1\)&mdash;unusable). Perhaps the real question is: is \(2\) arbitrary in some serious sense that \(0\) and \(1\) are not, but generally \(3\), \(4\), etc. are? Is this a false dichotomy? I don&#8217;t know.</p>

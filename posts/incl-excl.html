@@ -1,0 +1,116 @@
+---
+title: A more elegant statement and proof of the inclusion&ndash;exclusion principle
+layout: default
+categories: maths
+---
+
+<h2>Statement</h2>
+
+<p>A typical statement of the inclusion&ndash;exclusion principle is something like:</p>
+
+<blockquote>
+  <p>For finite sets \(A_1,\ldots,A_n\),</p>
+   <p>\[
+\left|\bigcup_{i=1}^n A_i\right| = \sum_{k=1}^n (-1)^{k+1} \left(\sum_{1\leq i_1<\cdots < i_k \leq n} |A_{i_1} \cap \cdots \cap A_{i_k}|\right)\text{.}
+\]</p>
+</blockquote>
+
+<p>This definition is pretty bad. We have used integer indices everywhere and split a sum over nonempty subsets of \(\mathcal{A}=\{A_1,\ldots,A_n\}\) into sizes not for any good reason, but so our notation is compatible with integer indices.</p>
+
+<p>So much for that. Using subsets, then, some write</p>
+
+<p>\[
+\left|\bigcup_{i=1}^n A_i\right| = \sum_{\varnothing \neq J \subseteq \{1,\ldots,n\}} (-1)^{|J|+1} \left| \bigcap_{j\in J} A_j\right|\text{.}
+\]</p>
+
+<p>This is as good as Wikipedia, textbooks, online lecture notes seem to get. But this is still sad, because we haven&#8217;t fully kicked our addiction to integer indices. Better is the following:</p>
+
+<blockquote>
+  <p>For a finite family of finite sets \(\mathcal{A}\),</p>
+  <p>\[
+  \left|\bigcup \mathcal{A}\right| = \sum_{\varnothing \neq J \subseteq \mathcal{A}} (-1)^{|J|+1} \left|\bigcap J\right|\text{.}
+  \]</p>
+</blockquote>
+
+<p>However, the exclusion of the empty set in the sum is a bit ugly. With some thought one may realise that the empty intersection&mdash;the universe&mdash;has been lurking on the left-hand side with the correct sign. With this we may write the inclusion&ndash;exclusion principle in the following form:</p>
+
+<blockquote>
+  <p>For a finite family of finite sets \(\mathcal{A}\),</p>
+  <p>\[
+  0 = \sum_{J \subseteq \mathcal{A}} (-1)^{|J|} \left|\bigcap J\right|
+  \]</p>
+  <p>where \(\bigcap \varnothing\) is taken to be \(\bigcup\mathcal{A}\).</p>
+</blockquote>
+
+<h2>Ugly proofs</h2>
+
+<p><a href="https://proofwiki.org/wiki/Inclusion-Exclusion_Principle#Proof" target="_blank" rel="noreferrer">Proof Wiki</a> gives an induction proof too disgusting to be worth analysing, but I&#8217;ve linked to it so you can see it in all of its rambling and impenetrable glory.</p>
+
+<p>Wikipedia&#8217;s first proof is a more typical proof which relies on showing that we have counted everything once and uses plenty of arithmetic to justify this. I reproduce it below.</p>
+
+<p>We shall consider</p>
+
+<p>\[
+\left|\bigcup_{i=1}^n A_i\right| = \sum_{\varnothing \neq J \subseteq \{1,\ldots,n\}} (-1)^{|J|+1} \left| \bigcap_{j\in J} A_j\right|\text{.}
+\]</p>
+
+<p>Every element \(c\) in \(\bigcup_{i=1}^nA_i\) is counted once on the left-hand side. We must show it is counted once on the right-hand side too. Suppose without loss of generality that \(c\) is contained in \(A_1,A_2,\ldots,A_t\) only. Then the contribution is \(\pm 1\) from each of these sets (depending on its size) and is therefore the number of these subsets used in the term.</p>
+
+<p>\[
+|\{A_i \mid 1 \leq i \leq t\}| - |\{A_i \cap A_j \mid 1 \leq i < j \leq t\}| + \cdots \\+ (-1)^{t+1}|\{A_1\cap A_2 \cap \cdots \cap A_t\}| = \binom{t}{1} - \binom{t}{2} + \cdots + (-1)^{t+1}\binom{t}{t}\text{.}
+\]</p>
+
+<p>By the binomial theorem,</p>
+
+<p>\[
+0 = (1-1)^t = \binom{t}{0}- \binom{t}{1} + \binom{t}{2} - \cdots + (-1)^{t}\binom{t}{t}\text{.}
+\]</p>
+
+<p>Hence the total contribution is equal to \(\binom{t}{0} - (1-1)^t = 1\).</p>
+
+<p>This proof is not terrible, but it relies on ad-hoc reasoning, book-keeping and counting, none of which is necessary. I want to do algebra.</p>
+
+<h2>Nice proof</h2>
+
+<p>We shall give a nicer, purely algebraic proof using Iverson brackets and no integer indices. An Iverson bracket for a boolean \(b\) is defined as</p>
+
+<p>\[
+[b] =\begin{cases}
+1 & b = \textbf{true}\\
+0 & b = \textbf{false}\text{.}
+\end{cases}
+\]</p>
+
+<p><strong>Theorem.</strong> Let \(\mathcal{A}\) be a finite family of finite sets and let \(\mathcal{X}=\bigcup \mathcal{A}\). Then</p>
+
+<p>\[0 = \sum_{J\subseteq \mathcal{A}}(-1)^{|J|} \left|\bigcap J\right|\]</p>
+
+<p>where \(\bigcap{\varnothing}\) is taken to be \(\mathcal{X}\).</p>
+
+<p><strong>Proof.</strong></p>
+\[\begin{aligned}
+0 &= \sum_{c\in\mathcal{X}}\prod_{B\in\mathcal{A}} (1-[c\in B]) && \text{ (each }c \text{ is in some }B\text{)}\\
+&= \sum_{c\in\mathcal{X}}\sum_{J\subseteq\mathcal{A}} \prod_{B\in J} - [c \in B] &&\text{ (expanding out product)} \\
+&=\sum_{c\in\mathcal{X}}\sum_{J\subseteq\mathcal{A}} (-1)^{|J|}[c \in \bigcap J] &&\text{ (} \prod_{B\in J}[c\in B] = [c \in \bigcap J] \text{)} \\
+<!-- &= \sum_{J\subseteq\mathcal{A}}(-1)^{|J|}\sum_{c\in\mathcal{X}} [c \in \bigcap J] &&\text{ (exchanging sums)}\\ -->
+&= \sum_{J\subseteq\mathcal{A}}(-1)^{|J|} \left|\bigcap{J}\right| &&\text{ (}\sum_c [c\in Z] = |Z|\text{). }\square
+\end{aligned}\]
+
+<!-- <p>Let \(c\) range over \(\mathcal{X}\), \(B\) over \(\mathcal{A}\) and \(J\) over \(\mathcal{P}(\mathcal{A})\). Then</p>
+
+\[\begin{aligned}
+0 &= \sum_c\prod_B (1-[c\in B]) && \text{ (each }c \text{ is in some }B\text{)}\\
+&= \sum_c\sum_J \prod_B - [c \in B]^{[B \in J]} &&\text{ (expanding out product)} \\
+&=\sum_c \sum_J (-1)^{|J|}[c \in \bigcap J] &&\text{ (} \prod_B[c\in B]^{[B \in J]} = [c \in \bigcap J] \text{)} \\
+&= \sum_J(-1)^{|J|} \left|\bigcap{J}\right| &&\text{ (}\sum_c [c\in Z] = |Z|\text{). }\square
+\end{aligned}\] -->
+
+<h2>Conclusion</h2>
+
+<p>Many theorems in textbooks and online encyclopedias are expressed and proven in clumsy and complicated ways. Why? I think the most likely reason is that people don&#8217;t really care. They&#8217;ve shown the statement is true; they then move onto more advanced mathematics. Spending time expressing relatively straightforward maths theorems concisely, or beautifully, is more of just a hobby.</p>
+
+<p>It probably doesn&#8217;t matter a great deal, but I think it&#8217;s a shame, because awkward statements of theorems can hide useful connections and awkward proofs are harder to understand. I wasn&#8217;t able to find the use of the empty intersection this way anywhere online, but it feels like something that should be mentioned somewhere in the standard exposition of the theorem. And certainly no-one seems to use Iverson brackets.</p>
+
+<p>The rise of formal theorem proving has at least created some interest in proving simple things nicely as the worse theorem statements and proofs are, the harder they are to formalise.</p>
+
+&mdash;Tuesday 17th October, 2023

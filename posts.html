@@ -1,0 +1,17 @@
+---
+layout: default
+---
+<h1>Posts</h1>
+<ul>
+{% for page in site.html_pages %}
+{% assign url_bits = page.url | split: "/" %}
+{% if url_bits[1] == "posts" %}
+  <li><a href="{{ page.url }}">{{ page.title }}</a>
+  {% assign cats = page.categories | split: "; " %}
+  {% for category in cats %}
+    <span class="custom-tag">{{ category }}</span>
+  {% endfor %}
+  </li>
+{% endif %}
+{% endfor %}
+</ul>

@@ -13,9 +13,12 @@
     <nav>
       <a href="/">Home</a>
       <a href="/music">Music</a>
-      <a href="/writing">Writing</a>
-      <!-- <a href="/ewd/">EWD</a> -->
+      <a href="/posts">Posts</a>
     </nav>
+    <!-- {% assign cats = page.categories | split: "; " %}
+  {% for category in cats %}
+    <span class="custom-tag">{{ category }}</span>
+  {% endfor %} -->
     <h1 class="page-title">{{ page.title }}</h1>
     <section>
       {{ content }}

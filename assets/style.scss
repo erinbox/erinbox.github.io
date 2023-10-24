@@ -82,7 +82,7 @@
 /* Variables and functions */
 
 $serif-font: EquityA, TimesNewRoman, Times New Roman, Times, Baskerville, Georgia, serif;
-$sans-serif-font: Concourse, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;
+$sans-serif-font: Concourse, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, Arial, sans-serif;
 $monospaced-font: 
              "Fira Mono", ui-monospace, 
              Menlo, Monaco, 
@@ -98,7 +98,7 @@ $body-text-size: 21px;
 $body-line-spacing: 1.45;
 $bg-color: #FFFFFF;
 $text-color: #000000;
-$accent-color: #E34234;
+$accent-color: #D04611;
 
 @mixin hyphenate {
     -webkit-hyphens: auto;
@@ -187,6 +187,10 @@ a {
     transition: opacity 0.1s;
 }
 
+// p > a::after {
+//     content: "†";
+// }
+
 a:hover {
     opacity: 0.5;
 }
@@ -272,3 +276,16 @@ hr.hr-footer {
 // hr.hr-footer::after {
 //     content: "⁂";
 // }
+
+
+
+
+span.custom-tag {
+    @include small-caps;
+    font-size: $body-text-size * 0.8;
+    color: #888;
+    background-color: #F0F0F0;
+    border-radius: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
+}

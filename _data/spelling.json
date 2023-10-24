@@ -26,6 +26,18 @@
             "modification_of": "a",
             "is_vowel": true
         },
+        "æ": {
+            "pronunciations": [
+                {
+                    "ipa": "ʌ",
+                    "example": "cup",
+                    "example_start": 1,
+                    "example_end": 2
+                }
+            ],
+            "modification_of": "q",
+            "is_vowel": true
+        },
         "b": {
             "pronunciations": [
                 {
@@ -50,7 +62,7 @@
             "modification_of": null,
             "is_vowel": false
         },
-        "ć": {
+        "č": {
             "pronunciations": [
                 {
                     "ipa": "tʃ",
@@ -134,7 +146,7 @@
             "modification_of": null,
             "is_vowel": false
         },
-        "ǵ": {
+        "ǧ": {
             "pronunciations": [
                 {
                     "ipa": "dʒ",
@@ -218,18 +230,6 @@
             "modification_of": null,
             "is_vowel": false
         },
-        "ł": {
-            "pronunciations": [
-                {
-                    "ipa": "w",
-                    "example": "wind",
-                    "example_start": 0,
-                    "example_end": 1
-                }
-            ],
-            "modification_of": "l",
-            "is_vowel": false
-        },
         "m": {
             "pronunciations": [
                 {
@@ -254,7 +254,7 @@
             "modification_of": null,
             "is_vowel": false
         },
-        "ń": {
+        "ň": {
             "pronunciations": [
                 {
                     "ipa": "ŋ",
@@ -326,7 +326,7 @@
             "modification_of": null,
             "is_vowel": false
         },
-        "ś": {
+        "š": {
             "pronunciations": [
                 {
                     "ipa": "ʃ",
@@ -365,13 +365,37 @@
         "u": {
             "pronunciations": [
                 {
-                    "ipa": "ʌ",
-                    "example": "cup",
+                    "ipa": "ʊ",
+                    "example": "book",
+                    "example_start": 1,
+                    "example_end": 3
+                },
+                {
+                    "ipa": "ᵿ",
+                    "example": "July",
                     "example_start": 1,
                     "example_end": 2
                 }
             ],
             "modification_of": null,
+            "is_vowel": true
+        },
+        "ú": {
+            "pronunciations": [
+                {
+                    "ipa": "uː",
+                    "example": "goose",
+                    "example_start": 1,
+                    "example_end": 3
+                },
+                {
+                    "ipa": "u",
+                    "example": "actual",
+                    "example_start": 3,
+                    "example_end": 4
+                }
+            ],
+            "modification_of": "u",
             "is_vowel": true
         },
         "v": {
@@ -389,38 +413,14 @@
         "w": {
             "pronunciations": [
                 {
-                    "ipa": "ʊ",
-                    "example": "book",
-                    "example_start": 1,
-                    "example_end": 3
-                },
-                {
-                    "ipa": "ᵿ",
-                    "example": "July",
-                    "example_start": 1,
-                    "example_end": 2
+                    "ipa": "w",
+                    "example": "wind",
+                    "example_start": 0,
+                    "example_end": 1
                 }
             ],
             "modification_of": null,
-            "is_vowel": true
-        },
-        "ẃ": {
-            "pronunciations": [
-                {
-                    "ipa": "uː",
-                    "example": "goose",
-                    "example_start": 1,
-                    "example_end": 3
-                },
-                {
-                    "ipa": "u",
-                    "example": "actual",
-                    "example_start": 3,
-                    "example_end": 4
-                }
-            ],
-            "modification_of": "w",
-            "is_vowel": true
+            "is_vowel": false
         },
         "y": {
             "pronunciations": [
@@ -458,7 +458,7 @@
             "modification_of": null,
             "is_vowel": false
         },
-        "ź": {
+        "ž": {
             "pronunciations": [
                 {
                     "ipa": "ʒ",
@@ -482,7 +482,7 @@
                 }
             ]
         },
-        "aw": {
+        "au": {
             "pronunciations": [
                 {
                     "ipa": "aʊ",
@@ -522,7 +522,7 @@
                 }
             ]
         },
-        "wy": {
+        "uy": {
             "pronunciations": [
                 {
                     "ipa": "ʊə",
@@ -532,7 +532,7 @@
                 }
             ]
         },
-        "yw": {
+        "ou": {
             "pronunciations": [
                 {
                     "ipa": "əʊ",

@@ -1,0 +1,615 @@
+---
+title: A sequent calculus prover for classical propositional logic
+layout: default
+categories: maths
+---
+
+
+<p>A prover for classical propositional logic using the sequent calculus. Propositions are single letters. Operator precedence goes \(\lnot\) (<code>!</code>), then \(\land\) (<code>&</code>) and \(\mid\) (<code>|</code>) jointly, then \(\to\) (<code>></code>), then \(\leftrightarrow\) (<code>=</code>). The parser understands \(\to\) to be right-associative (though binary operators are parenthesised for clarity in the derivation).</p>
+
+<!-- <input type="radio" id="logic-radio-classical" name="logic-radio">
+<label for="logic-radio-classical">Classical propositional logic</label><br>
+<input type="radio" id="logic-radio-intuitionistic" name="logic-radio">
+<label for="logic-radio-intuitionistic">Intuitionistic propositional logic (G4ip)</label><br> -->
+
+<style>
+.ladj {
+    text-align: left;
+}
+
+.output-wrapper {
+    margin: 20px;
+    text-align: center;
+}
+
+.output {
+    border: 1px solid grey;
+    min-width: 420px;
+    min-height: 74px;
+    padding: 0px 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+.proven { background-color: #e5ffcb; }
+.disproven { background-color: #ffcbcb; }
+
+.prove-button {
+    padding: 8px 80px;
+    font-size: 1em;
+    margin: auto;
+    display: flex;
+}
+</style>
+<table style="width: 150%">
+  <tr>
+    <th>Choose</th>
+    <th>Description</th>
+    <th>Input</th>
+  </tr>
+  <tr>
+    <td><input type="radio" id="calc-radio-pierce" name="calc-radio"></td>
+    <td class="ladj"><label for="calc-radio-pierce">Pierce&#8217;s law</label></td>
+    <td class="ladj"><code>((P > Q) > P) > P</code></td>
+  </tr>
+  <tr>
+    <td><input type="radio" id="calc-radio-absorp" name="calc-radio"></td>
+    <td class="ladj"><label for="calc-radio-absorp">Absorption rule (forward)</label></td>
+    <td class="ladj"><code>X | (!X & Y) = X | Y</code></td>
+  </tr>
+  <tr>
+    <td><input type="radio" id="calc-radio-distr" name="calc-radio"></td>
+    <td class="ladj"><label for="calc-radio-distr">Distributivity of AND over OR</label></td>
+    <td class="ladj"><code>A & (B | C) = (A & B) | (A & C)</code></td>
+  </tr>
+  <tr>
+    <td><input type="radio" id="calc-radio-conseq" name="calc-radio"></td>
+    <td class="ladj"><label for="calc-radio-conseq">Affirming the consequent (logical fallacy)</label></td>
+    <td class="ladj"><code>(P > Q) > (Q > P)</code></td>
+  </tr>
+  <tr>
+    <td><input type="radio" id="calc-radio-s-comb" name="calc-radio"></td>
+    <td class="ladj"><label for="calc-radio-s-comb">Axiom 2 of Hilbert systems; S combinator</label></td>
+    <td class="ladj"><code>(A > (B > C)) > ((A > B) > (A > C))</code></td>
+  </tr>
+  <tr>
+    <td><input type="radio" id="calc-radio-custom" name="calc-radio"></td>
+    <td class="ladj"><label for="calc-radio-custom">Custom</label></td>
+    <td class="ladj"><code><textarea id="latex-input" rows="1" class="tt" placeholder="I've not written this bit yet :(" style="font-size: 18.9px; margin: 4px 0px;"></textarea></code></td>
+  </tr>
+</table>
+
+<div class="output-wrapper"><div class="output" id="latexed-sequent"></div></div>
+
+<button class="prove-button" onclick="prove()">Prove</button>
+
+<div class="output-wrapper"><div class="output" id="latex-output">
+</div></div>
+
+<p>I would like to add intuitionistic logic (<a href="https://web2.qatar.cmu.edu/cs/15317/lectures/11-g4ip.pdf" target="_blank" rel="noreferrer">G4ip</a>) or first-order logics in the future.</p>
+<script>
+class Term {
+    /// Wrapping something of equal or lower precedence means that thing
+    /// needs parentheses.
+    precedence() {
+        if (this instanceof Lit) {
+            return 10;
+        } else if (this instanceof And) {
+            return 5;
+        } else if (this instanceof Or) {
+            return 5;
+        } else if (this instanceof Not) {
+            return 9;
+        } else if (this instanceof Impl) {
+            return 4;
+        } else if (this instanceof Iff) {
+            return 3;
+        }
+    }
+
+    wrapIfNeeded(outerTerm) {
+        return outerTerm.precedence() < this.precedence() || (outerTerm instanceof Not && this instanceof Not)
+            ? this.latexString()
+            : `(${this.latexString()})`;
+    }
+
+    toJsonStr() {
+        return JSON.stringify(this);
+    }
+
+    static fromJsonStr(s) {
+        return Term.fromJsonObj(JSON.parse(s));
+    }
+
+    static fromJsonObj(o) {
+        switch (o.type) {
+            case "Lit": return new Lit(o.letter);
+            case "Not": return new Not(Term.fromJsonObj(o.term));
+            default:
+                let left = Term.fromJsonObj(o.left);
+                let right = Term.fromJsonObj(o.right);
+                switch (o.type) {
+                    case "And": return new And(left, right);
+                    case "Or": return new Or(left, right);
+                    case "Impl": return new Impl(left, right);
+                    case "Iff": return new Iff(left, right);
+                }
+        }
+    }
+
+    /// Used for equality and stuff to get around JavaScript's idiotic
+    /// Set restriction. Designed to be easily parseable.
+    // toString() {
+    //     if (this instanceof Lit) {
+    //         return this.letter;
+    //     } else if (this instanceof Not) {
+    //         return `(!(${this.term.toString()}))`;
+    //     } else {
+    //         var op = "";
+    //         if (this instanceof And) {
+    //             op = "&";
+    //         } else if (this instanceof Or) {
+    //             op = "|";
+    //         } else if (this instanceof Impl) {
+    //             op = ">";
+    //         }
+    //         return `((${this.left.toString()})${op}(${this.right.toString()}))`;
+    //     }
+    // }
+
+    // static _findMatchingParen(str, i) {
+    //     var stack = 1;
+    //     for (var index = i+1; i < str.length; index++) {
+    //         let c = str[index];
+    //         if (c == "(") {
+    //             stack += 1;
+    //         }
+    //         if (c == ")") {
+    //             stack -= 1;
+    //             if (stack == 0) {
+    //                 return index;
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
+
+    // static fromString(s) {
+    //     console.log(s);
+    //     if (s[0] === "(") {
+    //         let idx = Term._findMatchingParen(s, 0);
+    //         if (idx === null) {
+    //             throw new Exception();
+    //         }
+    //         if (idx + 1 === s.length) {
+    //             console.log("Paren");
+    //             console.log(s.slice(1, idx));
+    //             return Term.fromString(s.slice(1, idx));
+    //         }
+    //         console.log("!!!");
+    //         let nextC = s[idx+1];
+    //         switch (nextC) {
+    //             case "&":
+    //             case "|":
+    //             case ">":
+    //                 // must exist and be a left paren
+    //                 let leftParenIdx = idx+2;
+    //                 let rightParenIdx = Term._findMatchingParen(s, leftParenIdx);
+    //                 if (rightParenIdx === null) {
+    //                     throw new Exception();
+    //                 }
+    //                 console.log(s.slice(1,idx+1));
+    //                 console.log(s.slice(leftParenIdx, rightParenIdx));
+    //                 let recurLeft = Term.fromString(s.slice(1,idx+1));
+    //                 let recurRight = Term.fromString(s.slice(leftParenIdx, rightParenIdx));
+    //                 switch (nextC) {
+    //                     case "&": return new And(recurLeft, recurRight);
+    //                     case "|": return new Or(recurLeft, recurRight);
+    //                     case ">": return new Impl(recurLeft, recurRight);
+    //                 }
+    //         }
+    //     } else if (s[0] === "!") {
+    //         let rightIdx = Term._findMatchingParen(s, 1);
+    //         if (idx === null) {
+    //             throw new Exception();
+    //         }
+    //         console.log("Not");
+    //         console.log(s.slice(1, rightIdx));
+    //         // return new Not(Term.fromString(s.slice(1, rightIdx)));
+    //     } else {
+    //         if (s.length !== 1) {
+    //             throw new Exception();
+    //         }
+    //         return new Lit(s);
+    //     }
+
+    //     console.log("Shouldn't be here.")
+    //     console.log(s);
+    // }
+
+    _parseExpr(lhs, minPrecedence) {
+
+    }
+
+
+    latexString() {
+        if (this instanceof Lit) {
+            return this.letter;
+        } else if (this instanceof Not) {
+            let t = this.term.wrapIfNeeded(this);
+            return `\\lnot ${t}`;
+        } else {
+            var op = "";
+            if (this instanceof And) {
+                op = "\\land";//"\\mathrel{\\&}";
+            } else if (this instanceof Or) {
+                op = "\\mid";
+            } else if (this instanceof Impl) {
+                op = "\\to";
+            } else if (this instanceof Iff) {
+                op = "\\leftrightarrow";
+            }
+            let l = this.left.wrapIfNeeded(this);
+            let r = this.right.wrapIfNeeded(this);
+            return `${l} ${op} ${r}`;
+        }
+    }
+
+    atomic() {
+        return this instanceof Lit;
+    }
+
+    equals(other) {
+        if (this instanceof Lit && other instanceof Lit) {
+            return this.letter === other.letter;
+        } else if ((this instanceof And && other instanceof And)
+            || (this instanceof Or && other instanceof Or)
+            || (this instanceof Impl && other instanceof Impl)
+            || (this instanceof Iff && other instanceof Iff)) {
+            return this.left.equals(other.left) && this.right.equals(other.right);
+        } else if (this instanceof Not && other instanceof Not) {
+            return this.term.equals(other.term);
+        } else {
+            return false;
+        }
+    }
+}
+
+class Lit extends Term {
+    constructor(letter) {
+        super();
+        this.type = "Lit";
+        this.letter = letter;
+    }
+}
+
+class And extends Term {
+    constructor(left, right) {
+        super();
+        this.type = "And";
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class Or extends Term {
+    constructor(left, right) {
+        super();
+        this.type = "Or";
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class Not extends Term {
+    constructor(term) {
+        super();
+        this.type = "Not";
+        this.term = term;
+    }
+}
+
+class Impl extends Term {
+    constructor(left, right) {
+        super();
+        this.type = "Impl";
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class Iff extends Term {
+    constructor(left, right) {
+        super();
+        this.type = "Iff";
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class Sequent {
+    // pass in term lists/enumerables
+    constructor(leftTerms, rightTerms) {
+        this.leftTermSet = new Set(leftTerms.map(t => t.toJsonStr()));
+        this.rightTermSet = new Set(rightTerms.map(t => t.toJsonStr()));
+    }
+
+    static fromJsonSets(leftTermSet, rightTermSet) {
+        let seq = Object.create(this.prototype);
+        seq.leftTermSet = leftTermSet;
+        seq.rightTermSet = rightTermSet;
+        return seq;
+    }
+
+    /// turns a sequent into one or two sequents with some progress made.
+    /// returns either a list of sequents or a bool where true means
+    /// holds and false means doesn't hold.
+    evolve() {
+        // isDisjointFrom has low browser support
+        for (var s of this.leftTermSet) {
+            if (this.rightTermSet.has(s)) {
+                return true;
+            }
+        }
+        for (var s of this.rightTermSet) {
+            if (this.leftTermSet.has(s)) {
+                return true;
+            }
+        }
+
+        // Non-branching stuff done first
+        for (var s of this.rightTermSet) {
+            let sObj = Term.fromJsonStr(s);
+            if (sObj instanceof Lit) {
+                continue;
+            }else if (sObj instanceof Or) {
+                let newRight = new Set(this.rightTermSet);
+                newRight.delete(s);
+                newRight.add(sObj.left.toJsonStr());
+                newRight.add(sObj.right.toJsonStr());
+                return [Sequent.fromJsonSets(this.leftTermSet, newRight)];
+            } else if (sObj instanceof Not) {
+                let newLeft = new Set(this.leftTermSet);
+                newLeft.add(sObj.term.toJsonStr());
+                let newRight = new Set(this.rightTermSet);
+                newRight.delete(s);
+                return [Sequent.fromJsonSets(newLeft, newRight)];
+            } else if (sObj instanceof Impl) {
+                let newLeft = new Set(this.leftTermSet);
+                newLeft.add(sObj.left.toJsonStr());
+                let newRight = new Set(this.rightTermSet);
+                newRight.delete(s);
+                newRight.add(sObj.right.toJsonStr());
+                return [Sequent.fromJsonSets(newLeft, newRight)];
+            }
+        }
+        for (var s of this.leftTermSet) {
+            let sObj = Term.fromJsonStr(s);
+            if (sObj instanceof Lit) {
+                continue;
+            } else if (sObj instanceof And) {
+                let newLeft = new Set(this.leftTermSet);
+                newLeft.delete(s);
+                newLeft.add(sObj.left.toJsonStr());
+                newLeft.add(sObj.right.toJsonStr());
+                return [Sequent.fromJsonSets(newLeft, this.rightTermSet)];
+            } else if (sObj instanceof Not) {
+                let newLeft = new Set(this.leftTermSet);
+                newLeft.delete(s);
+                let newRight = new Set(this.rightTermSet);
+                newRight.add(sObj.term.toJsonStr());
+                return [Sequent.fromJsonSets(newLeft, newRight)];
+            }
+        }
+        // branching ones
+        for (var s of this.rightTermSet) {
+            let sObj = Term.fromJsonStr(s);
+            if (sObj instanceof And) {
+                let newRightL = new Set(this.rightTermSet);
+                newRightL.delete(s);
+                newRightL.add(sObj.left.toJsonStr());
+                let newRightR = new Set(this.rightTermSet);
+                newRightR.delete(s);
+                newRightR.add(sObj.right.toJsonStr());
+                return [
+                    Sequent.fromJsonSets(this.leftTermSet, newRightL),
+                    Sequent.fromJsonSets(this.leftTermSet, newRightR),
+                ];
+            } else if (sObj instanceof Iff) {
+                let newLeft1 = new Set(this.leftTermSet);
+                newLeft1.add(sObj.left.toJsonStr());
+                let newRight1 = new Set(this.rightTermSet);
+                newRight1.delete(s);
+                newRight1.add(sObj.right.toJsonStr());
+                let newLeft2 = new Set(this.leftTermSet);
+                newLeft2.add(sObj.right.toJsonStr());
+                let newRight2 = new Set(this.rightTermSet);
+                newRight2.delete(s);
+                newRight2.add(sObj.left.toJsonStr());
+                return [
+                    Sequent.fromJsonSets(newLeft1, newRight1),
+                    Sequent.fromJsonSets(newLeft2, newRight2),
+                ];
+            }
+        }
+        for (var s of this.leftTermSet) {
+            let sObj = Term.fromJsonStr(s);
+            if (sObj instanceof Or) {
+                let newLeft1 = new Set(this.leftTermSet);
+                newLeft1.delete(s);
+                newLeft1.add(sObj.left.toJsonStr());
+                let newLeft2 = new Set(this.leftTermSet);
+                newLeft2.delete(s);
+                newLeft2.add(sObj.right.toJsonStr());
+                return [
+                    Sequent.fromJsonSets(newLeft1, this.rightTermSet),
+                    Sequent.fromJsonSets(newLeft2, this.rightTermSet),
+                ];
+            } else if (sObj instanceof Impl) {
+                let newLeft1 = new Set(this.leftTermSet);
+                newLeft1.delete(s);
+                let newRight1 = new Set(this.rightTermSet);
+                newRight1.add(sObj.left.toJsonStr());
+                let newLeft2 = new Set(this.leftTermSet);
+                newLeft2.delete(s);
+                newLeft2.add(sObj.right.toJsonStr());
+                return [
+                    Sequent.fromJsonSets(newLeft1, newRight1),
+                    Sequent.fromJsonSets(newLeft2, this.rightTermSet),
+                ];
+            } else if (sObj instanceof Iff) {
+                let newLeft1 = new Set(this.leftTermSet);
+                newLeft1.delete(s);
+                let newRight1 = new Set(this.rightTermSet);
+                newRight1.add(sObj.left.toJsonStr());
+                newRight1.add(sObj.right.toJsonStr());
+                let newLeft2 = new Set(this.leftTermSet);
+                newLeft2.delete(s);
+                newLeft2.add(sObj.left.toJsonStr());
+                newLeft2.add(sObj.right.toJsonStr());
+                return [
+                    Sequent.fromJsonSets(newLeft1, newRight1),
+                    Sequent.fromJsonSets(newLeft2, this.rightTermSet),
+                ];
+            }
+        }
+
+        // axiom check at the start failed so
+        return false;
+    }
+
+    latexString() {
+        let left = Array.from(this.leftTermSet)
+            .map(t => Term.fromJsonStr(t).latexString())
+            .join(", ");
+        let right = Array.from(this.rightTermSet)
+            .map(t => Term.fromJsonStr(t).latexString())
+            .join(", ");
+        return `${left} \\vdash ${right}`;
+    }
+
+    createEntireTree() {
+        let thisLatex = this.latexString();
+        let next = this.evolve();
+        var nextContents = "";
+        if (Array.isArray(next)) {
+            nextContents = Array.from(new Set(next.map(seq => seq.createEntireTree())
+                ))
+                .join(" \\qquad ");
+        } else if (next) {
+            nextContents = "\\square";
+        } else {
+            nextContents = "\\times";
+        }
+
+        return `\\cfrac{${thisLatex}}{${nextContents}}`;
+    }
+}
+
+let distr = new Iff(
+    new And(
+        new Lit("A"),
+        new Or(
+            new Lit("B"),
+            new Lit("C")
+        )
+    ),
+    new Or(
+        new And(
+            new Lit("A"),
+            new Lit("B")
+        ),
+        new And(
+            new Lit("A"),
+            new Lit("C"),
+        )
+    ),
+);
+let sComb = new Impl(
+    new Impl(
+        new Lit("A"),
+        new Impl(
+            new Lit("B"),
+            new Lit("C"),
+        ),
+    ),
+    new Impl(
+        new Impl(
+            new Lit("A"),
+            new Lit("B"),
+        ),
+        new Impl(
+            new Lit("A"),
+            new Lit("C"),
+        ),
+    ),
+);
+let distr2 = new And(new Impl(new Lit("A"), new Lit("B")), new Impl(new Lit("B"), new Lit("A")));
+let exclMiddle = new Or(new Lit("A"), new Not(new Lit("A")));
+let pierce = new Impl(new Impl(new Impl(new Lit("P"), new Lit("Q")), new Lit("P")), new Lit("P"));
+let absurd = new Impl(new And(new Lit("P"), new Not(new Lit("P"))), new Lit("Q"));
+let doubleNegExclMiddle = new Not(new Not(exclMiddle));
+let absorb = new Iff(new Or(new Lit("X"), new And(new Not(new Lit("X")), new Lit("Y"))), new Or(new Lit("X"), new Lit("Y")));
+let affirmingTheConsequent = new Impl(new Impl(new Lit("P"), new Lit("Q")), new Impl(new Lit("Q"), new Lit("P")),)
+
+// Won't be needed when I have an actual parser
+let INBUILT_SEQS = {
+    "calc-radio-pierce": pierce,
+    "calc-radio-distr": distr,
+    "calc-radio-s-comb": sComb,
+    "calc-radio-absorp": absorb,
+    "calc-radio-conseq": affirmingTheConsequent,
+    "calc-radio-custom": distr2,
+}
+
+var CURRENT_TERM = null;
+
+const clearOutput = () => {
+    let display = document.getElementById("latexed-sequent");
+    let output = document.getElementById("latex-output");
+    for (let s of [display, output]) {
+        s.classList.remove("disproven");
+        s.classList.remove("proven");
+    }
+    output.innerHTML = "";
+}
+
+for (let radio of document.querySelectorAll('input[name="calc-radio"]')) {
+    radio.addEventListener("click", () => {
+        let display = document.getElementById("latexed-sequent");
+        let term = INBUILT_SEQS[radio.id];
+        let termLatex = term.latexString();
+        CURRENT_TERM = term;
+        katex.render(termLatex, display, {
+            displayMode: true,
+            throwOnError: false
+        });
+        let output = document.getElementById("latex-output");
+        clearOutput();
+    });
+}
+
+const prove = () => {
+    let inputText = document.getElementById("latex-input").value;
+    console.log(inputText);
+    let display = document.getElementById("latexed-sequent");
+    let output = document.getElementById("latex-output");
+    let result = new Sequent([], [CURRENT_TERM]).createEntireTree();
+    katex.render(result, output, {
+        displayMode: true,
+        throwOnError: false
+    });
+
+    if (result.includes("\\times")) {
+        for (let s of [display, output]) {
+            s.classList.add("disproven");
+            s.classList.remove("proven");
+        }
+    } else {
+        for (let s of [display, output]) {
+            s.classList.add("proven");
+            s.classList.remove("disproven");
+        }
+    }
+}
+</script>

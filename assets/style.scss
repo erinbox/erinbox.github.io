@@ -115,6 +115,7 @@ $accent-color: #D04611;
 sc { @include small-caps; font-family: $sans-serif-font; }
 
 .sf { font-family: $sans-serif-font; }
+.tt { font-family: $monospaced-font; }
 
 /* */
 
@@ -208,6 +209,7 @@ table {
     width: 75%;
     margin-top: 30px;
     margin-bottom: 30px;
+    border-collapse: collapse;
 }
 
 $cell-padding: 28px;
@@ -289,3 +291,5 @@ span.custom-tag {
     padding-left: 3px;
     padding-right: 3px;
 }
+
+.katex { font-size: 1.1em; }

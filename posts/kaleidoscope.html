@@ -302,7 +302,7 @@ enableOrDisableCalculateButton();
 const asdf = async () => {
     LIVE_SOLVE_CONTAINER.innerHTML = "";
     SOLUTIONS_CONTAINER.innerHTML = "";
-    const boardToSolve = CANVAS_COLORS;
+    const boardToSolve = structuredClone(CANVAS_COLORS);
     for (const [type, solution] of solveBoard(boardToSolve, true)) {
         const s = drawSolution(solution, boardToSolve, 320);
         LIVE_SOLVE_CONTAINER.innerHTML = "";

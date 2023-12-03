@@ -92,21 +92,17 @@ class Solver {
             nodes[column[0]].up = column[column.length-1];
         }
 
-        // for (const [i, node] of nodes.entries()) {
-        //     console.log(`${i}: L${node.left}, R${node.right}, U${node.up}, D${node.down}, C${node.col}, S${node.size}, I${node.rowLabel}`);
-        // }
-
         this.x = nodes;
         this.o = new Array(num_cols);
     }
 
     * search(k) {
-        if (this.x[HEAD].right === HEAD) {
-            yield [
-                "solution",
-                this.o.slice(0, k).map(o_ => this.x[o_].rowLabel),
-            ];
-        }
+        // if (this.x[HEAD].right === HEAD) {
+        //     yield [
+        //         "solution",
+        //         this.o.slice(0, k).map(o_ => this.x[o_].rowLabel),
+        //     ];
+        // }
 
         let c = this.colWithLeast1s();
         this.cover(c);
@@ -115,8 +111,16 @@ class Solver {
             for (let j = this.x[r].right; j !== r; j = this.x[j].right) {
                 this.cover(this.x[j].col);
             }
+
+            const solutionType = this.x[HEAD].right === HEAD
+                ? "solution" : "partial";
+            yield [
+                solutionType,
+                this.o.slice(0, k+1).map(o_ => this.x[o_].rowLabel),
+            ];
+
             yield* this.search(k+1);
-  
+
             r = this.o[k];
             c = this.x[r].col;
             for (let j = this.x[r].left; j !== r; j = this.x[j].left) {
@@ -186,12 +190,12 @@ ones = [
 ].
 
 */
-function* solve_ones(ones, num_cols) {
+function* dlxSolveOnes(ones, num_cols) {
     const solver = new Solver(ones, num_cols);
     yield* solver.search(0);
 }
 
-function* solve_matrix(matrix) {
+function* dlxSolveMatrix(matrix) {
     const ones = [];
     let num_cols = undefined;
     for (const row of matrix) {
@@ -207,7 +211,7 @@ function* solve_matrix(matrix) {
         }
         ones.push(onesRow);
     }
-    yield* solve_ones(ones, num_cols);
+    yield* dlxSolveOnes(ones, num_cols);
 }
 
 // const example = [

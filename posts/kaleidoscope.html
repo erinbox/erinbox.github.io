@@ -174,158 +174,28 @@ body {
 <button id="calculate-button" onclick="calculateSolutions()">Calculate solutions</button>
 
 
+<div id="live-solve-container"></div>
 <div id="solutions-container"></div>
 <script src="dancing_links.js"></script>
-<script src="pieces.js"></script>
+<script src="kaleidoscope-pieces.js"></script>
+<script src="kaleidoscope-svg.js"></script>
 <script>
-// console.log(ALL_PLACEMENTS);
-
-// Takes a board array a[8][8] and turns it into an array of
-// constraints to be 
-function* solveBoard(board) {
-    const NUM_CONSTRAINT_COLUMNS = NUM_PIECES + 8*8; // 82
-    const placementIndex = [];
-    const constraints = [];
-    for (const [pieceName, placements] of ALL_PLACEMENTS.entries()) {
-        for (const placement of placements) {
-            if (placement.every(cell => {
-                const [[x,y], c] = cell;
-                return board[y][x] === c; // important y/x flip
-            })) {
-                placementIndex.push([pieceName, placement]);
-                // There are 18+64=82 constraint columns: 18, one for
-                // each piece, then 64, one for each square.
-                const constraint = [PIECE_NAME_INDEX.get(pieceName)];
-                for (const cell of placement) {
-                    const [[x,y], _] = cell;
-                    constraint.push(NUM_PIECES+x+y*8);
-                }
-                constraints.push(constraint);
-            }
-        }
-    }
-
-    for (const output of solve_ones(constraints, NUM_CONSTRAINT_COLUMNS)) {
-        let [outputType, result] = output;
-        if (outputType === "solution") {
-            const actual = result.map(i => placementIndex[i]);
-            yield actual;
-        }
-    }
-}
+let CURRENT_EXAMPLE = "custom";
+let CURRENT_FILL_COLOUR = "R"; // one of "UNSET", "R", "B", "L", "Y"
+const CANVAS_COLORS = [
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
+];
+const LIVE_SOLVE_CONTAINER = document.getElementById("live-solve-container");
+const SOLUTIONS_CONTAINER = document.getElementById("solutions-container");
 
 const getSqTableCell = (i,j) => document.getElementById(`sq-${i}-${j}`);
-
-const ELEPHANT = [
-    ['B','R','B','R','B','R','B','R'],
-    ['R','B','R','B','R','B','R','B'],
-    ['B','R','B','R','B','R','B','R'],
-    ['R','B','R','R','R','B','R','B'],
-    ['R','B','B','B','R','R','B','R'],
-    ['B','R','B','B','B','B','R','B'],
-    ['R','R','R','B','B','B','R','R'],
-    ['B','R','R','B','R','B','R','B'],
-];
-const MAGIC_SQUARE = (() => {
-    const b = "B";
-    const r = "R";
-    const l = "L";
-    const y = "Y";
-    return [
-        [l,b,l,b,l,b,l,b],
-        [b,y,b,y,b,y,b,l],
-        [l,b,y,b,y,b,y,b],
-        [b,y,b,l,b,y,b,l],
-        [l,b,y,b,l,b,y,b],
-        [b,y,b,y,b,y,b,l],
-        [l,b,y,b,y,b,y,b],
-        [b,l,b,l,b,l,b,l],
-    ];
-})();
-const STARSHIP = (() => {
-    const b = "B";
-    const r = "R";
-    const l = "L";
-    const y = "Y";
-    return [
-        [b,l,b,l,b,y,b,l],
-        [l,b,b,b,b,b,l,b],
-        [b,b,y,y,y,y,b,y],
-        [l,b,y,y,b,b,l,b],
-        [b,b,y,b,l,l,b,l],
-        [y,b,y,b,l,b,y,b],
-        [b,l,b,l,b,y,b,y],
-        [l,b,y,b,l,b,y,b],
-    ];
-})();
-const GOLDFISH = (() => {
-    const b = "B";
-    const r = "R";
-    const l = "L";
-    const y = "Y";
-    return [
-        [b,y,b,l,b,y,b,l],
-        [y,b,b,b,y,b,l,b],
-        [b,b,r,r,b,l,b,y],
-        [l,b,r,r,r,b,y,b],
-        [b,y,b,r,b,y,b,l],
-        [y,b,l,b,y,b,l,b],
-        [b,l,b,y,b,l,b,y],
-        [l,b,y,b,l,b,y,b],
-    ];
-})();
-const QUESTION_MARK = [
-    ["B","L","B","Y","B","L","B","Y"],
-    ["Y","B","L","R","R","B","L","B"],
-    ["B","Y","B","B","R","Y","B","L"],
-    ["L","B","Y","R","R","B","Y","B"],
-    ["B","L","B","R","B","L","B","Y"],
-    ["Y","B","L","B","Y","B","L","B"],
-    ["B","Y","B","R","B","Y","B","L"],
-    ["L","B","Y","B","L","B","Y","B"],
-];
-const DOMINOES_CLASH = [
-    ["B","B","R","R","B","B","R","R"],
-    ["B","R","B","B","R","R","B","B"],
-    ["R","B","R","R","B","B","R","R"],
-    ["R","B","R","B","R","R","B","B"],
-    ["B","R","B","R","B","B","R","R"],
-    ["B","R","B","R","B","R","B","B"],
-    ["R","B","R","B","R","B","R","R"],
-    ["R","B","R","B","R","B","R","B"],
-];
-const SIGNAL_MAN = [
-    ["B","R","B","R","B","R","B","R"],
-    ["R","B","R","B","R","B","R","B"],
-    ["B","R","B","R","R","R","B","R"],
-    ["R","B","B","B","Y","B","Y","B"],
-    ["B","Y","Y","L","B","L","Y","B"],
-    ["B","B","B","L","L","L","B","B"],
-    ["R","B","B","R","R","R","B","R"],
-    ["B","B","R","R","B","R","R","B"],
-];
-const CUSTOM = [
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-    ["UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET", "UNSET"],
-];
-const EXAMPLES = [
-    ["example1", "elephant", ELEPHANT],
-    ["example2", "magic-square", MAGIC_SQUARE],
-    ["example3", "starship", STARSHIP],
-    ["example4", "goldfish", GOLDFISH],
-    ["example5", "question-mark", QUESTION_MARK],
-    ["example6", "dominoes-clash", DOMINOES_CLASH],
-    ["example7", "signal-man", SIGNAL_MAN],
-    ["example8", "custom", CUSTOM],
-];
-
-let CURRENT_EXAMPLE = "custom";
 
 const enableOrDisableCalculateButton = () => {
     const button = document.getElementById("calculate-button");
@@ -336,6 +206,7 @@ const enableOrDisableCalculateButton = () => {
     }
 }
 
+/* Takes a board and overwrites the current canvas with it. */
 const boardToDisplay = (board) => {
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
@@ -350,172 +221,30 @@ const boardToDisplay = (board) => {
     enableOrDisableCalculateButton();
 }
 
-const sqTableCell = getSqTableCell(0,0);
+/* The calculate solutions button. Currently just blats the first 200
+full solutions in. */
+calculateSolutions = async () => {
+    await asdf();
+    // const boardToSolve = CANVAS_COLORS;
+    // boardSolutions = solveBoard(boardToSolve);
+    // const solutions = [];
+    // for (let i = 0; i < 200; i++) {
+    //     const [_type, nextSol] = boardSolutions.next().value;
+    //     if (nextSol === undefined) {
+    //         break;
+    //     }
+    //     solutions.push(nextSol);
+    // }
 
-calculateSolutions = () => {
-    boardSolutions = solveBoard(CANVAS_COLORS);
-    const solutions = [];
-    for (let i = 0; i < 200; i++) {
-        const nextSol = boardSolutions.next().value;
-        if (nextSol === undefined) {
-            break;
-        }
-        solutions.push(nextSol);
-    }
-
-    const solutionsCont = document.getElementById("solutions-container");
-    solutionsCont.innerHTML = "";
-    for (const solution of solutions) {
-        const s = drawSolution(solution);
-        solutionsCont.appendChild(s);
-    }
+    // const SOLUTIONS_CONTAINER = document.getElementById("solutions-container");
+    // SOLUTIONS_CONTAINER.innerHTML = "";
+    // for (const solution of solutions) {
+    //     const s = drawSolution(solution, boardToSolve, 240);
+    //     SOLUTIONS_CONTAINER.appendChild(s);
+    // }
 }
 
-const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-const SQUARE_UNITS = 8;
-
-const makeElement = (name) => document.createElementNS(SVG_NAMESPACE, name);
-
-// Makes a base SVG with the right dimensions.
-const makeBaseSvg = (size) => {
-    const svg = document.createElementNS(SVG_NAMESPACE, "svg");
-    svg.setAttribute("width", `${size}`);
-    svg.setAttribute("height", `${size}`);
-    svg.setAttribute("viewBox", "-2 -2 72 72");
-    return svg;
-}
-
-const xyCoords = (x,y) => [x*SQUARE_UNITS, y*SQUARE_UNITS];
-
-const squareElement = (i,j,colour) => {
-    let fillStyle = undefined;
-    switch (colour) {
-        case "R":
-            fillStyle = "#ef1e02";
-            break;
-        case "B":
-            fillStyle = "#111111";
-            break;
-        case "L":
-            fillStyle = "#3366FF";
-            break;
-        case "Y":
-            fillStyle = "#efd300";
-            break;
-        case "UNSET":
-            fillStyle = "#bbbbbb";
-            break;
-        default:
-            throw new Error();
-    }
-
-    const rect = makeElement("rect");
-    const [x,y] = xyCoords(i,j);
-    rect.setAttribute("x", `${x}`);
-    rect.setAttribute("y", `${y}`);
-    rect.setAttribute("width", `${SQUARE_UNITS}`);
-    rect.setAttribute("height", `${SQUARE_UNITS}`);
-    rect.setAttribute("fill", fillStyle);
-    return rect;
-}
-
-const lineBetweenSquares = (i,j,dir) => {
-    let a1,b1,a2,b2;
-    if (dir === "horizontal") {
-        [a1,b1] = xyCoords(i,j+1);
-        [a2,b2] = xyCoords(i+1,j+1);
-        a1 -= 0.5;
-        a2 += 0.5;
-    } else {
-        [a1,b1] = xyCoords(i+1,j);
-        [a2,b2] = xyCoords(i+1,j+1);
-        b1 -= 0.5;
-        b2 += 0.5;
-    }
-    const line = makeElement("line");
-    line.setAttribute("x1", `${a1}`);
-    line.setAttribute("y1", `${b1}`);
-    line.setAttribute("x2", `${a2}`);
-    line.setAttribute("y2", `${b2}`);
-    line.setAttribute("stroke-width", "1");
-    line.setAttribute("stroke", "#FFF");
-    return line;
-}
-
-const outerLines = () => {
-    const corners = [[0,0],[0,8],[8,8],[8,0]];
-    const results = [];
-    for (let i = 0; i < corners.length; i++) {
-        const [x1,y1] = corners[i];
-        const [x2,y2] = corners[(i+1)%corners.length];
-        const [cx1, cy1] = xyCoords(x1, y1);
-        const [cx2, cy2] = xyCoords(x2, y2);
-        // if (x1 === x2) { // vertical
-        //     cyStart = Math.max(x1)
-        //     cy2 += 
-        // }
-
-        const line = makeElement("line");
-        line.setAttribute("x1", `${cx1}`);
-        line.setAttribute("y1", `${cy1}`);
-        line.setAttribute("x2", `${cx2}`);
-        line.setAttribute("y2", `${cy2}`);
-        line.setAttribute("stroke-width", "1");
-        line.setAttribute("stroke", "#FFF");
-        results.push(line);
-    }
-    return results;
-}
-
-const getAllBorders = solution => {
-    const belonging = [
-        Array(8),
-        Array(8),
-        Array(8),
-        Array(8),
-        Array(8),
-        Array(8),
-        Array(8),
-        Array(8),
-    ];
-    for (const [name, cells] of solution) {
-        for (const [[x,y], _colour] of cells) {
-            belonging[y][x] = name;
-        }
-    }
-    const borders = [];
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            const sq = belonging[j][i];
-            if (i != 7) {
-                const right = belonging[j][i+1];
-                if (sq !== right) {
-                    borders.push([i,j,"vertical"]);
-                }
-            }
-            if (j != 7) {
-                const down = belonging[j+1][i];
-                if (sq !== down) {
-                    borders.push([i,j,"horizontal"]);
-                }
-            }
-        }
-    }
-    return borders;
-}
-
-const drawBoard = (board, size) => {
-    const svg = makeBaseSvg(size);
-    for (const [y, row] of board.entries()) {
-        for (const [x, colour] of row.entries()) {
-            const square = squareElement(x,y,colour);
-            svg.appendChild(square);
-        }
-    }
-    return svg;
-}
-
-const adf = document.getElementById("example-problems");
+/* Draw the examples. */
 for (const [exampleId, exampleName, example] of EXAMPLES) {
     const svg = drawBoard(example, 120);
     svg.id = `example-name-${exampleName}`;
@@ -528,38 +257,8 @@ for (const [exampleId, exampleName, example] of EXAMPLES) {
     });
 }
 
-function drawSolution(solution) {
-    const svg = makeBaseSvg(240);
-    for (const [_, cells] of solution) {
-        for (const [[x,y], colour] of cells) {
-            const square = squareElement(x,y,colour);
-            svg.appendChild(square);
-        }
-    }
-    const borders = getAllBorders(solution);
-    for (const [i,j,type] of borders) {
-        const line = lineBetweenSquares(i,j,type);
-        svg.appendChild(line);
-    }
-    for (const line of outerLines()) {
-        svg.appendChild(line);
-    }
-    return svg;
-}
-
-// one of "UNSET", "R", "B", "L", "Y"
-let CURRENT_FILL_COLOUR = "R";
-const CANVAS_COLORS = [
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-    ["UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET","UNSET"],
-];
-
+/* Listeners on each cell on the big canvas so they paint properly.
+Editing the "custom" example actually edits it for selection. */
 for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
         const sqTableCell = getSqTableCell(i,j);
@@ -580,7 +279,7 @@ for (let i = 0; i < 8; i++) {
         })
     }
 }
-
+/* Listeners on the palette colours so they select properly. */
 for (const color of ["UNSET", "R", "B", "L", "Y"]) {
     const paletteChooserId = `palette-chooser-${color.toLowerCase()}`;
     const chooser = document.getElementById(paletteChooserId);
@@ -597,5 +296,24 @@ for (const color of ["UNSET", "R", "B", "L", "Y"]) {
         }
     })
 }
+
 enableOrDisableCalculateButton();
+
+const asdf = async () => {
+    LIVE_SOLVE_CONTAINER.innerHTML = "";
+    SOLUTIONS_CONTAINER.innerHTML = "";
+    const boardToSolve = CANVAS_COLORS;
+    for (const [type, solution] of solveBoard(boardToSolve, true)) {
+        const s = drawSolution(solution, boardToSolve, 320);
+        LIVE_SOLVE_CONTAINER.innerHTML = "";
+        LIVE_SOLVE_CONTAINER.appendChild(s);
+        const ms = type === "partial" ? 25 : 500;
+        if (type === "solution") {
+            const s = drawSolution(solution, boardToSolve, 160);
+            SOLUTIONS_CONTAINER.appendChild(s);
+        }
+        await new Promise(r => setTimeout(r, ms));
+    }
+};
+
 </script>

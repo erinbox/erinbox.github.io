@@ -48,10 +48,39 @@ body {
 
 #calculate-button {
     padding: 10px 50px;
+    margin: 25px auto;
+    display: block;
 }
 
 .example {
     cursor: pointer;
+}
+
+#solutions-container {
+    height: 500px;
+    overflow-y: scroll;
+    border: 1px solid black;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#live-solve-container {
+    margin: auto;
+    height: 390px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-solve-grid {
+    display: flex;
+    margin: auto;
+}
+
+.smaller-solutions {
+    margin: 10px;
 }
 </style>
 <p>The page is a work in progress, but the solver works.</p>
@@ -171,6 +200,10 @@ body {
     </table>
 </div>
 </div>
+<input type="radio" id="show-solutions-true" name="show-solutions" value="true" checked>
+<label for="show-solutions-true">Show how the solver works (slow)</label><br>
+<input type="radio" id="show-solutions-false" name="show-solutions" value="false">
+<label for="show-solutions-false">Just show solutions (fast)</label><br>
 <button id="calculate-button" onclick="calculateSolutions()">Calculate solutions</button>
 
 
@@ -299,21 +332,28 @@ for (const color of ["UNSET", "R", "B", "L", "Y"]) {
 
 enableOrDisableCalculateButton();
 
+const getShowPartialSolutionsValue = () =>
+    document.querySelector('input[name="show-solutions"]:checked').value === "true";
+
 const asdf = async () => {
     LIVE_SOLVE_CONTAINER.innerHTML = "";
     SOLUTIONS_CONTAINER.innerHTML = "";
+    const showPartialSolutions = getShowPartialSolutionsValue();
     const boardToSolve = structuredClone(CANVAS_COLORS);
-    for (const [type, solution] of solveBoard(boardToSolve, true)) {
+    for (const [type, solution] of solveBoard(boardToSolve, showPartialSolutions)) {
         const s = drawSolution(solution, boardToSolve, 320);
+        s.classList.add("main-solve-grid");
         LIVE_SOLVE_CONTAINER.innerHTML = "";
         LIVE_SOLVE_CONTAINER.appendChild(s);
-        const ms = type === "partial" ? 25 : 500;
+        const ms = showPartialSolutions ?
+            type === "partial" ? 35 : 500
+            : 80;
         if (type === "solution") {
-            const s = drawSolution(solution, boardToSolve, 160);
-            SOLUTIONS_CONTAINER.appendChild(s);
+            const st = drawSolution(solution, boardToSolve, 160);
+            st.classList.add("smaller-solutions");
+            SOLUTIONS_CONTAINER.appendChild(st);
         }
         await new Promise(r => setTimeout(r, ms));
     }
 };
-
 </script>

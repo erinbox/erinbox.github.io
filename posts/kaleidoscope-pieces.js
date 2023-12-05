@@ -276,12 +276,12 @@ function* solveBoard(board, showPartialSolutions) {
         }
     }
 
-    for (const output of dlxSolveOnes(constraints, NUM_CONSTRAINT_COLUMNS)) {
+    const gen = dlxSolveOnes(
+        constraints, NUM_CONSTRAINT_COLUMNS, showPartialSolutions);
+
+    for (const output of gen) {
         let [outputType, result] = output;
-        // The solver yields partial and full solutions.
-        if (showPartialSolutions || outputType === "solution") {
-            const actual = result.map(i => placementIndex[i]);
-            yield [outputType, actual];
-        }
+        const actual = result.map(i => placementIndex[i]);
+        yield [outputType, actual];
     }
 }

@@ -14,7 +14,16 @@ class Node {
 const HEAD = 0;
 
 class Solver {
-    constructor(ones, num_cols) {
+    constructor(ones, numCols, showPartialSolutions, numPrimaryCols) {
+        if (numPrimaryCols === undefined) {
+            numPrimaryCols = numCols;
+        }
+        if (showPartialSolutions === undefined) {
+            showPartialSolutions = false;
+        }
+        console.log(numPrimaryCols, showPartialSolutions);
+        this.showPartialSolutions = showPartialSolutions;
+
         const rowMap = new Map();
         const columnMap = new Map();
 
@@ -24,10 +33,12 @@ class Solver {
         nodes.push(head);
         // The index of column header c is c+1 due to head.
         // row label is not used.
-        for (let c = 0; c < num_cols; c++) {
+        for (let c = 0; c < numCols; c++) {
             nodes.push(new Node({
-                left: c,
-                right: c+2,
+                // secondary columns should not point to adjacent columns
+                // on the left and right but rather only to themselves
+                left: c < numPrimaryCols ? c : c+1,
+                right: c < numPrimaryCols ? c+2 : c+1,
                 up: c+1,
                 down: c+1,
                 col: c+1,
@@ -36,11 +47,11 @@ class Solver {
         }
 
         // if there are any columns, head should link to the next one
-        if (num_cols > 0) {
+        if (numCols > 0) {
             nodes[0].right = 1;
         }
-        // the last column's right wraps around to head
-        nodes[nodes.length-1].right = 0;
+        // the last primary column's right wraps around to head
+        nodes[numPrimaryCols].right = 0;
 
         // the main stuff
         for (const [i, onesRow] of ones.entries()) {
@@ -93,31 +104,47 @@ class Solver {
         }
 
         this.x = nodes;
-        this.o = new Array(num_cols);
+        this.o = new Array(numCols);
     }
 
     * search(k) {
-        // if (this.x[HEAD].right === HEAD) {
-        //     yield [
-        //         "solution",
-        //         this.o.slice(0, k).map(o_ => this.x[o_].rowLabel),
-        //     ];
-        // }
+        if (this.x[HEAD].right === HEAD) {
+            return;
+        }
 
-        let c = this.colWithLeast1s();
+        let [c, s] = this.colWithLeast1s();
+        if (s === 0) {
+            return;
+        }
         this.cover(c);
+        let firstTime = true;
         for (let r = this.x[c].down; r !== c; r = this.x[r].down) {
+            // have a think about this logic, not sure it's right.
+            if (this.showPartialSolutions) {
+                if (firstTime) {
+                    firstTime = false;
+                } else {
+                    yield [
+                        "partial",
+                        this.o.slice(0, k).map(o_ => this.x[o_].rowLabel),
+                    ];
+                }
+            }
+
             this.o[k] = r;
             for (let j = this.x[r].right; j !== r; j = this.x[j].right) {
                 this.cover(this.x[j].col);
             }
 
-            const solutionType = this.x[HEAD].right === HEAD
-                ? "solution" : "partial";
-            yield [
-                solutionType,
-                this.o.slice(0, k+1).map(o_ => this.x[o_].rowLabel),
-            ];
+            const fullSolution = this.x[HEAD].right === HEAD;
+            if (this.showPartialSolutions || fullSolution) {
+                const solutionType = fullSolution
+                    ? "solution" : "partial";
+                yield [
+                    solutionType,
+                    this.o.slice(0, k+1).map(o_ => this.x[o_].rowLabel),
+                ];
+            }
 
             yield* this.search(k+1);
 
@@ -141,7 +168,7 @@ class Solver {
                 s = jNode.size;
             }
         }
-        return minCol;
+        return [minCol, s];
     }
 
     cover(c) {
@@ -172,7 +199,7 @@ class Solver {
 
 
 /* `ones` is an array of arrays, each of which contains natural-number
-indices of ones in the matrix. `num_cols` is the number of columns.
+indices of ones in the matrix. `numCols` is the number of columns.
 For example,
 
 ones = [
@@ -180,7 +207,7 @@ ones = [
     [5,7],
     [1,6,7],
     [3],
-], num_cols = 7 corresponds to the matrix
+], numCols = 7 corresponds to the matrix
 
 [
     [1,0,1,0,1,1,0,0],
@@ -190,20 +217,20 @@ ones = [
 ].
 
 */
-function* dlxSolveOnes(ones, num_cols) {
-    const solver = new Solver(ones, num_cols);
+function* dlxSolveOnes(ones, numCols, showPartialSolutions, numPrimaryCols) {
+    const solver = new Solver(ones, numCols, showPartialSolutions, numPrimaryCols);
     yield* solver.search(0);
 }
 
-function* dlxSolveMatrix(matrix) {
+function* dlxSolveMatrix(matrix, showPartialSolutions, numPrimaryCols) {
     const ones = [];
-    let num_cols = undefined;
+    let numCols = undefined;
     for (const row of matrix) {
         const onesRow = [];
-        if (num_cols !== undefined && row.length !== num_cols) {
+        if (numCols !== undefined && row.length !== numCols) {
             throw new Exception("Rows of different lengths passed in");
         }
-        num_cols = row.length;
+        numCols = row.length;
         for (const [i, cell] of row.entries()) {
             if (cell) {
                 onesRow.push(i);
@@ -211,7 +238,7 @@ function* dlxSolveMatrix(matrix) {
         }
         ones.push(onesRow);
     }
-    yield* dlxSolveOnes(ones, num_cols);
+    yield* dlxSolveOnes(ones, numCols, showPartialSolutions, numPrimaryCols);
 }
 
 // const example = [

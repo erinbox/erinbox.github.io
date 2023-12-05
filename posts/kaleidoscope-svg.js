@@ -9,7 +9,9 @@ const makeBaseSvg = (size) => {
     const svg = makeElement("svg");
     svg.setAttribute("width", `${size}`);
     svg.setAttribute("height", `${size}`);
-    svg.setAttribute("viewBox", "-2 -2 72 72");
+    const lowBound = -0.5*SOLUTION_BORDER_STROKE_WIDTH;
+    const widthAndHeight = 8*SQUARE_UNITS + SOLUTION_BORDER_STROKE_WIDTH;
+    svg.setAttribute("viewBox", `${lowBound} ${lowBound} ${widthAndHeight} ${widthAndHeight}`);
     svg.style["shape-rendering"] = "crispEdges";
     return svg;
 }

@@ -1,5 +1,5 @@
 ---
-title: Visibility
+title: Lines of sight (demo)
 categories: games; computer science
 ---
 
@@ -14,6 +14,9 @@ categories: games; computer science
 
  W      ↑            
 ASD    ←↓→     QE     R
+
+
+## How does it work?
 </code></pre>
 
 <style>
@@ -148,6 +151,15 @@ const addLineToTree = (root, i, j, reverse, circlePoints) => {
 const buildTree = (radius) => {
     const root = new Tree([0,0], []);
     const pointsToDrawLinesTo = [];
+    // Open question: How many cells do you have to check to get all
+    // possible lines within a given radius? Checking only cells
+    // within the circle is definitely not enough. Is a square of
+    // side length 2r good enough? Gone with 4r here which is probably
+    // overkill, but I don't actually know the answer to this.
+    //
+    // The best thing to do is probably to try some ridiculously large
+    // number and properly pre-calculate the trees rather than
+    // do them on page load as I'm doing here.
     for (let i = -2*radius; i <= 2*radius; i++) {
         for (let j = -2*radius; j <= 2*radius; j++) {
             pointsToDrawLinesTo.push([i,j]);
@@ -191,11 +203,16 @@ const getVisiblePoints = (initialPoint, blocksVisibility, visibilityTree) => {
 
 const WIDTH = 100;
 const HEIGHT = 35;
-const VISIBLE_RADIUS = 15;
-const WALL_LIKELIHOOD = 0.05;
+let CURRENT_RADIUS = 13;
+const MIN_RADIUS = 5;
+const MAX_RADIUS = 25;
+const WALL_LIKELIHOOD = 0.075;
 
-const TREES = [null,null,null,null,null];
-for (let i = 5; i <= 25; i++) {
+const TREES = [];
+for (let i = 0; i < MIN_RADIUS; i++) {
+    TREES.push(null);
+}
+for (let i = MIN_RADIUS; i <= MAX_RADIUS; i++) {
     TREES.push(buildTree(i));
 }
 
@@ -265,8 +282,6 @@ const printArena = (arr, player, sightRadius) => {
     return [chars.join(""), backgroundChars.join("")];
 }
 
-
-let CURRENT_RADIUS = 15;
 const GRID = document.getElementById("grid");
 const BACKGROUND = document.getElementById("background-grid");
 [GRID.innerHTML, BACKGROUND.innerHTML] = printArena(WALL_ARRAY, player, CURRENT_RADIUS);
@@ -306,9 +321,9 @@ const processLogicalInput = input => {
 
     if (input === DECREASE_RADIUS || input === INCREASE_RADIUS) {
         if (input === DECREASE_RADIUS) {
-            CURRENT_RADIUS = Math.max(CURRENT_RADIUS-1, 5);
+            CURRENT_RADIUS = Math.max(CURRENT_RADIUS-1, MIN_RADIUS);
         } else {
-            CURRENT_RADIUS = Math.min(CURRENT_RADIUS+1, 25);
+            CURRENT_RADIUS = Math.min(CURRENT_RADIUS+1, MAX_RADIUS);
         }
         changed = true;
     } else if (input === SHUFFLE) {

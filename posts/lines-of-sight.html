@@ -106,7 +106,8 @@ const drawFilledCircle = (radius) => {
         error += 4*y + 2;
     }
 
-    return Array.from(points).map(pointFromStr);
+    return points;
+    // return Array.from(points).map(pointFromStr);
 }
 
 
@@ -124,7 +125,7 @@ class Tree {
     }
 }
 
-const addLineToTree = (root, i, j, reverse) => {
+const addLineToTree = (root, i, j, reverse, circlePoints) => {
     let currentTree = root;
     const start = [0,0];
     const end = [i,j];
@@ -132,6 +133,9 @@ const addLineToTree = (root, i, j, reverse) => {
         ? drawLine(end, start).reverse()
         : drawLine(start, end);
     for (const p of line) {
+        // if (!circlePoints.has(pointToStr(p))) {
+        //     break;
+        // }
         let child = currentTree.children.find(t => pointsEq(t.point, p));
         if (child === undefined) {
             child = new Tree(p, []);
@@ -144,13 +148,19 @@ const addLineToTree = (root, i, j, reverse) => {
 
 const buildTree = (radius) => {
     const root = new Tree([0,0], []);
+    // const pointsToDrawLinesTo = [];
+    // for (let i = -2*radius; i <= 2*radius; i++) {
+    //     for (let j = -2*radius; j <= 2*radius; j++) {
+    //         pointsToDrawLinesTo.push([i,j]);
+    //     }
+    // }
     const circlePoints = drawFilledCircle(radius);
 
-    for (const [i,j] of circlePoints) {
+    for (const [i,j] of Array.from(circlePoints)) {
         // Allow for biasing even splits both ways in the line-drawing
         // algorithm for extra viewability.
         for (const reverse of [false, true]) {
-            addLineToTree(root, i, j, reverse);
+            addLineToTree(root, i, j, reverse, circlePoints);
         }
     }
 
@@ -233,30 +243,16 @@ const printArena = (arr, player, sightRadius) => {
     const visiblePoints = getVisiblePoints(player, blocksVisibility, TREES[sightRadius]);
     const chars = [];
     const backgroundChars = [];
-    let spanOn = false;
     for (let j = 0; j < arr.length; j++) {
         for (let i = 0; i < arr[j].length; i++) {
             const point = [i,j];
             const visible = visiblePoints.has(pointToStr(point));
-            // make minimum number of spans
-            // if (visible && !spanOn) {
-            //     chars.push("<span class=\"n\">");
-            //     spanOn = true;
-            // } else if (!visible && spanOn) {
-            //     chars.push("</span>");
-            //     spanOn = false;
-            // }
             const c = !visible ? " "
                 : pointsEq(point, player) ? "@"
                 : arrIndex(arr, point) ? "#"
                 : ".";
             if (c === "@") {
-                const v = `<span class=\"a\">${c}</span>`;
-                if (spanOn) {
-                    chars.push(`</span>${v}<span class=\"n\">`);
-                } else {
-                    chars.push(v);
-                }
+                chars.push(`<span class=\"a\">${c}</span>`);
             } else {
                 chars.push(c);
             }

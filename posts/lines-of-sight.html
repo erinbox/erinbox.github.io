@@ -351,9 +351,12 @@ const processLogicalInput = input => {
 
 
 document.addEventListener("keydown", e => {
-    const input = processKeyboardInput(e.code);
-    if (input !== null) {
-        processLogicalInput(input);
+    if (!e.altKey && !e.ctrlKey && !e.shiftKey) {
+        const input = processKeyboardInput(e.code);
+        if (input !== null) {
+            e.preventDefault();
+            processLogicalInput(input);
+        }
     }
 });
 </script>

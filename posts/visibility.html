@@ -1,0 +1,359 @@
+---
+title: Visibility
+categories: games; computer science
+---
+
+
+<div style="display: grid;">
+<div id="background-grid-div"><pre><code id="background-grid">
+</code></pre></div>
+<pre><code id="grid"></code></pre>
+</div>
+<pre><code id="instructions">
+ #      <span class="a">@</span>      O      ?
+
+ W      ↑            
+ASD    ←↓→     QE     R
+</code></pre>
+
+<style>
+@font-face {
+    font-family: "Fira Mono";
+    font-weight: 300;
+    src: url("../assets/fonts/fira_mono_regular.woff2");
+}
+
+@font-face {
+    font-family: "Fira Mono";
+    font-weight: 600;
+    src: url("../assets/fonts/fira_mono_bold.woff2");
+}
+body {
+    background-color: #222;
+    color: #AAA;
+    font-family: "Fira Mono";
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#grid { color: #999;/*#3c3c3c*/; z-index: 2; }
+
+#background-grid-div { position: absolute; }
+#background-grid { color: #3a3a3a; z-index: 1; }
+
+#grid, #instructions, #background-grid {
+    text-align: center;
+    /* display: block; */
+}
+
+.n { color: #ccc; } .a { color: #D04611; }
+</style>
+
+<script>
+/* Theoretical stuff. */
+
+const drawLine = (start, end) => {
+    let [x0,y0] = start;
+    let [x1,y1] = end;
+    const dx = Math.abs(x1 - x0);
+    const sx = x0 < x1 ? 1 : -1;
+    const dy = -Math.abs(y1 - y0);
+    const sy = y0 < y1 ? 1 : -1;
+    let error = dx + dy;
+
+    const line = [];
+    while (true) {
+        line.push([x0,y0]);
+        if (x0 === x1 && y0 === y1) { break; }
+        const e2 = 2 * error;
+        if (e2 >= dy) {
+            if (x0 === x1) { break; }
+            error += dy;
+            x0 += sx;
+        }
+
+        if (e2 <= dx) {
+            if (y0 === y1) { break; }
+            error += dx;
+            y0 += sy;
+        }
+    }
+
+    return line;
+}
+
+
+const drawFilledCircle = (radius) => {
+    let x = radius;
+    let y = 0;
+    let error = 3 - 2*radius;
+    const points = new Set();
+    while (x >= y)
+    {
+        for (let i = -x; i <= x; i++) {
+            for (const j of [y, -y]) {
+                points.add(pointToStr([i,j]));
+                points.add(pointToStr([j,i]));
+            }
+        }
+        if (error > 0)
+        {
+            x -= 1;
+            error -= 4*x;
+        }
+        y += 1;
+        error += 4*y + 2;
+    }
+
+    return Array.from(points).map(pointFromStr);
+}
+
+
+
+const pointsEq = (a,b) => a[0] === b[0] && a[1] === b[1];
+
+class Tree {
+    constructor(point, children) {
+        this.point = point;
+        this.children = children;
+    }
+
+    cs() {
+        return this.children.map(t => t.point);
+    }
+}
+
+const addLineToTree = (root, i, j, reverse) => {
+    let currentTree = root;
+    const start = [0,0];
+    const end = [i,j];
+    let line = reverse
+        ? drawLine(end, start).reverse()
+        : drawLine(start, end);
+    for (const p of line) {
+        let child = currentTree.children.find(t => pointsEq(t.point, p));
+        if (child === undefined) {
+            child = new Tree(p, []);
+            currentTree.children.push(child);
+        }
+
+        currentTree = child;
+    }
+}
+
+const buildTree = (radius) => {
+    const root = new Tree([0,0], []);
+    const circlePoints = drawFilledCircle(radius);
+
+    for (const [i,j] of circlePoints) {
+        // Allow for biasing even splits both ways in the line-drawing
+        // algorithm for extra viewability.
+        for (const reverse of [false, true]) {
+            addLineToTree(root, i, j, reverse);
+        }
+    }
+
+    return root;
+}
+
+const pointToStr = p => `${p[0]},${p[1]}`;
+const pointFromStr = s => s.split(",").map(i => parseInt(i));
+
+const getVisiblePoints = (initialPoint, blocksVisibility, visibilityTree) => {
+    const [x,y] = initialPoint;
+    const visiblePoints = new Set();
+    // I hate JavaScript
+    const stack = [visibilityTree];
+    while (stack.length > 0) {
+        const nextTree = stack.pop();
+        const [i,j] = nextTree.point;
+        const translatedPoint = [x+i,y+j];
+        visiblePoints.add(pointToStr(translatedPoint));
+        if (!blocksVisibility(translatedPoint)) {
+            stack.push(...nextTree.children);
+        }
+    }
+
+    return visiblePoints;
+}
+
+// Example-specific things.
+
+const WIDTH = 100;
+const HEIGHT = 35;
+const VISIBLE_RADIUS = 15;
+const WALL_LIKELIHOOD = 0.05;
+
+const TREES = [null,null,null,null,null];
+for (let i = 5; i <= 25; i++) {
+    TREES.push(buildTree(i));
+}
+
+const arrContains = (arr, p) => {
+    const [i,j] = p;
+    if (0 <= j && j < arr.length) {
+        const row = arr[j];
+        return 0 <= i && i < row.length;
+    } else {
+        return false;
+    }
+}
+
+const arrIndex = (arr, p) => {
+    const [i,j] = p;
+    return arr[j][i];
+}
+
+const arrSetIndex = (arr, p, v) => {
+    const [i,j] = p;
+    arr[j][i] = v;
+}
+
+
+const genWallArray = () => {
+    const arr = [];
+    for (let j = 0; j < HEIGHT; j++) {
+        const row = [];
+        for (let i = 0; i < WIDTH; i++) {
+            row.push(Math.random() < WALL_LIKELIHOOD);
+        }
+        arr.push(row);
+    }
+    arrSetIndex(arr, player, false);
+    return arr;
+}
+
+let player = [Math.floor(WIDTH/2), Math.floor(HEIGHT/2)];
+let WALL_ARRAY = genWallArray();
+
+const blocksVisibility = point => !arrContains(WALL_ARRAY, point) || arrIndex(WALL_ARRAY, point);
+
+const printArena = (arr, player, sightRadius) => {
+    const visiblePoints = getVisiblePoints(player, blocksVisibility, TREES[sightRadius]);
+    const chars = [];
+    const backgroundChars = [];
+    let spanOn = false;
+    for (let j = 0; j < arr.length; j++) {
+        for (let i = 0; i < arr[j].length; i++) {
+            const point = [i,j];
+            const visible = visiblePoints.has(pointToStr(point));
+            // make minimum number of spans
+            // if (visible && !spanOn) {
+            //     chars.push("<span class=\"n\">");
+            //     spanOn = true;
+            // } else if (!visible && spanOn) {
+            //     chars.push("</span>");
+            //     spanOn = false;
+            // }
+            const c = !visible ? " "
+                : pointsEq(point, player) ? "@"
+                : arrIndex(arr, point) ? "#"
+                : ".";
+            if (c === "@") {
+                const v = `<span class=\"a\">${c}</span>`;
+                if (spanOn) {
+                    chars.push(`</span>${v}<span class=\"n\">`);
+                } else {
+                    chars.push(v);
+                }
+            } else {
+                chars.push(c);
+            }
+            const backgroundC = visible ? " " : ".";
+            backgroundChars.push(backgroundC);
+        }
+        chars.push("\n");
+        backgroundChars.push("\n");
+    }
+
+    return [chars.join(""), backgroundChars.join("")];
+}
+
+
+let CURRENT_RADIUS = 15;
+const GRID = document.getElementById("grid");
+const BACKGROUND = document.getElementById("background-grid");
+[GRID.innerHTML, BACKGROUND.innerHTML] = printArena(WALL_ARRAY, player, CURRENT_RADIUS);
+const UP = "UP";
+const RIGHT = "RIGHT";
+const DOWN = "DOWN";
+const LEFT = "LEFT";
+const PLACE_UP = "PLACE_UP";
+const PLACE_RIGHT = "PLACE_RIGHT";
+const PLACE_DOWN = "PLACE_DOWN";
+const PLACE_LEFT = "PLACE_LEFT";
+const DECREASE_RADIUS = "DECREASE_RADIUS";
+const INCREASE_RADIUS = "INCREASE_RADIUS";
+const SHUFFLE = "SHUFFLE";
+const processKeyboardInput = code => {
+    switch (code) {
+        case "ArrowUp":    return UP;
+        case "ArrowRight": return RIGHT;
+        case "ArrowDown":  return DOWN;
+        case "ArrowLeft":  return LEFT;
+        case "KeyW":       return PLACE_UP;
+        case "KeyD":       return PLACE_RIGHT;
+        case "KeyS":       return PLACE_DOWN;
+        case "KeyX":       return PLACE_DOWN;
+        case "KeyA":       return PLACE_LEFT;
+        case "KeyQ":       return DECREASE_RADIUS;
+        case "KeyE":       return INCREASE_RADIUS;
+        case "KeyR":       return SHUFFLE;
+        default:           return null;
+    }
+}
+
+const processLogicalInput = input => {
+    let changed = false;
+    let [i,j] = player;
+    let newPosition = undefined;
+
+    if (input === DECREASE_RADIUS || input === INCREASE_RADIUS) {
+        if (input === DECREASE_RADIUS) {
+            CURRENT_RADIUS = Math.max(CURRENT_RADIUS-1, 5);
+        } else {
+            CURRENT_RADIUS = Math.min(CURRENT_RADIUS+1, 25);
+        }
+        changed = true;
+    } else if (input === SHUFFLE) {
+        WALL_ARRAY = genWallArray();
+        changed = true;
+    } else {
+        switch (input) {
+            case UP:    case PLACE_UP:    newPosition = [i, j-1]; break;
+            case RIGHT: case PLACE_RIGHT: newPosition = [i+1, j]; break;
+            case DOWN:  case PLACE_DOWN:  newPosition = [i, j+1]; break;
+            case LEFT:  case PLACE_LEFT:  newPosition = [i-1, j]; break;
+            default: break;
+        }
+        let moveType = input.startsWith("PLACE") ? "PLACE" : "MOVE";
+
+        if (newPosition !== undefined && arrContains(WALL_ARRAY, newPosition)) {
+            if (moveType === "MOVE") {
+                // point exists and is a wall
+                if (!arrIndex(WALL_ARRAY, newPosition)) {
+                    player = newPosition;
+                    changed = true;
+                }
+            } else {
+                const isWall = arrIndex(WALL_ARRAY, newPosition);
+                arrSetIndex(WALL_ARRAY, newPosition, !isWall);
+                changed = true;
+            }
+        }
+    }
+
+    if (changed) {
+        [GRID.innerHTML, BACKGROUND.innerHTML] = printArena(WALL_ARRAY, player, CURRENT_RADIUS);
+    }
+}
+
+
+document.addEventListener("keydown", e => {
+    const input = processKeyboardInput(e.code);
+    if (input !== null) {
+        processLogicalInput(input);
+    }
+});
+</script>

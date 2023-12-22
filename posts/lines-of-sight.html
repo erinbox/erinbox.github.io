@@ -3,7 +3,7 @@ title: Lines of sight (demo)
 categories: games; computer science
 ---
 
-
+<!DOCTYPE html>
 <div style="display: grid;">
 <div id="background-grid-div"><pre><code id="background-grid">
 </code></pre></div>
@@ -116,40 +116,44 @@ const drawFilledCircle = (radius) => {
 
 const pointsEq = (a,b) => a[0] === b[0] && a[1] === b[1];
 
-class Tree {
-    constructor(point, children) {
-        this.point = point;
-        this.children = children;
-    }
-
-    cs() {
-        return this.children.map(t => t.point);
-    }
-}
-
-const addLineToTree = (root, i, j, reverse, circlePoints) => {
-    let currentTree = root;
+const addLineToTree = (treeArray, i, j, reverse, circlePoints) => {
+    let currentIdx = 0;
+    let currentTree = treeArray[0];
     const start = [0,0];
     const end = [i,j];
     let line = reverse
         ? drawLine(end, start).reverse()
         : drawLine(start, end);
-    for (const p of line) {
+    // every line starts with [0,0], remove it
+    for (const p of line.slice(1, line.length)) {
         if (!circlePoints.has(pointToStr(p))) {
             break;
         }
-        let child = currentTree.children.find(t => pointsEq(t.point, p));
-        if (child === undefined) {
-            child = new Tree(p, []);
-            currentTree.children.push(child);
+        // each entry in treeArray is a list of pairs [i, p] where i is the index and p is the point.
+        let childIdx = currentTree.find(t => pointsEq(t[1], p));
+        let child = null;
+        let newIdx;
+        if (childIdx === undefined) {
+            child = [];
+            treeArray.push(child);
+            newIdx = treeArray.length-1;
+            currentTree.push([treeArray.length-1, p]);
+            if (currentTree.length > 20) {
+                break;
+            }
+        } else {
+            newIdx = childIdx[0];
+            child = treeArray[childIdx[0]];
         }
-
         currentTree = child;
     }
 }
 
+/// Builds a visibility tree. The tree is stored in an array of arrays
+/// [childIndices] where point is of the form [x,y] and [childIndices]
+/// is a list of array indices to the node's children. tree[0] is the root.
 const buildTree = (radius) => {
-    const root = new Tree([0,0], []);
+    const treeArray = [[]];
     const pointsToDrawLinesTo = [];
     // Open question: How many cells do you have to check to get all
     // possible lines within a given radius? Checking only cells
@@ -171,11 +175,11 @@ const buildTree = (radius) => {
         // Allow for biasing even splits both ways in the line-drawing
         // algorithm for extra viewability.
         for (const reverse of [false, true]) {
-            addLineToTree(root, i, j, reverse, circlePoints);
+            addLineToTree(treeArray, i, j, reverse, circlePoints);
         }
     }
 
-    return root;
+    return treeArray;
 }
 
 const pointToStr = p => `${p[0]},${p[1]}`;
@@ -185,14 +189,14 @@ const getVisiblePoints = (initialPoint, blocksVisibility, visibilityTree) => {
     const [x,y] = initialPoint;
     const visiblePoints = new Set();
     // I hate JavaScript
-    const stack = [visibilityTree];
+    const stack = [[[0,0], visibilityTree[0]]];
     while (stack.length > 0) {
         const nextTree = stack.pop();
-        const [i,j] = nextTree.point;
+        const [i,j] = nextTree[0];
         const translatedPoint = [x+i,y+j];
         visiblePoints.add(pointToStr(translatedPoint));
         if (!blocksVisibility(translatedPoint)) {
-            stack.push(...nextTree.children);
+            stack.push(...nextTree[1].map(t_i => [t_i[1], visibilityTree[t_i[0]]]));
         }
     }
 
@@ -214,6 +218,10 @@ for (let i = 0; i < MIN_RADIUS; i++) {
 }
 for (let i = MIN_RADIUS; i <= MAX_RADIUS; i++) {
     TREES.push(buildTree(i));
+}
+
+for (let i = MIN_RADIUS; i <= MAX_RADIUS; i++) {
+    console.log(`const TREES_${MIN_RADIUS} = ${JSON.stringify(TREES[i])};`)
 }
 
 const arrContains = (arr, p) => {

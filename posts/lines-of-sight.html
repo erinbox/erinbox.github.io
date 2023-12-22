@@ -107,7 +107,6 @@ const drawFilledCircle = (radius) => {
     }
 
     return points;
-    // return Array.from(points).map(pointFromStr);
 }
 
 
@@ -133,9 +132,9 @@ const addLineToTree = (root, i, j, reverse, circlePoints) => {
         ? drawLine(end, start).reverse()
         : drawLine(start, end);
     for (const p of line) {
-        // if (!circlePoints.has(pointToStr(p))) {
-        //     break;
-        // }
+        if (!circlePoints.has(pointToStr(p))) {
+            break;
+        }
         let child = currentTree.children.find(t => pointsEq(t.point, p));
         if (child === undefined) {
             child = new Tree(p, []);
@@ -148,15 +147,15 @@ const addLineToTree = (root, i, j, reverse, circlePoints) => {
 
 const buildTree = (radius) => {
     const root = new Tree([0,0], []);
-    // const pointsToDrawLinesTo = [];
-    // for (let i = -2*radius; i <= 2*radius; i++) {
-    //     for (let j = -2*radius; j <= 2*radius; j++) {
-    //         pointsToDrawLinesTo.push([i,j]);
-    //     }
-    // }
+    const pointsToDrawLinesTo = [];
+    for (let i = -2*radius; i <= 2*radius; i++) {
+        for (let j = -2*radius; j <= 2*radius; j++) {
+            pointsToDrawLinesTo.push([i,j]);
+        }
+    }
     const circlePoints = drawFilledCircle(radius);
 
-    for (const [i,j] of Array.from(circlePoints)) {
+    for (const [i,j] of pointsToDrawLinesTo) {
         // Allow for biasing even splits both ways in the line-drawing
         // algorithm for extra viewability.
         for (const reverse of [false, true]) {

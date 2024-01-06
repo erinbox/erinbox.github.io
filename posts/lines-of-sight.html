@@ -3,21 +3,54 @@ title: Lines of sight (demo)
 categories: games; computer science
 ---
 
-
+<!DOCTYPE html>
 <div style="display: grid;">
 <div id="background-grid-div"><pre><code id="background-grid">
 </code></pre></div>
 <pre><code id="grid"></code></pre>
 </div>
 <pre><code id="instructions">
- #      <span class="a">@</span>      O      ?
+ #      <span class="a">@</span>      O      ?     .
 
- W      ↑            
-ASD    ←↓→     QE     R
-
-
-## How does it work?
+ W      ↑                  
+ASD    ←↓→     QE     R     C
 </code></pre>
+
+<div id="how">
+<h2>How it works</h2>
+
+<p>First, we need to determine the circle of view. A naïve approach would be to take all points a distance of R or less from the origin, where R is the radius of the circle of view. However, this produces poor circles&mdash;in particular, the circle will be &ldquo;pointy&rdquo; in the four cardinal directions. There is a better algorithm for this known as Bresenham&#8217;s circle algorithm, which draws <a href="https://possiblywrong.wordpress.com/2022/02/14/bresenhams-circles-are-always-optimal/" target="_blank" rel="noreferrer">optimal circles</a>:</p>
+
+<pre><code>
+def drawCircle(radius):
+    x=radius; y=0; error=3-2*radius; points=set()
+    while x >= y:
+        # Modified to draw filled circles.
+        # To draw only the outline, replace the following with the
+        # line `points.update(((x,y),(x,-y),(-x,y),(-x,-y),(y,x),(y,-x),(-y,x),(-y,-x)))`.
+        for i in range(-x,x+1):
+            for j in (y,-y):
+                points.add((i,j)); points.add((j,i))
+
+        if error > 0: x -= 1; error -= 4*x
+        y += 1; error += 4*y + 2
+    return points
+</code></pre>
+
+<p>Next, we need to decide how we are going to draw lines. In the continuous 2D case, you can calculate exact field of view using a technique called shadowcasting. In the discrete case, however, there is no objective definition of field of view&mdash;it depends how you decide to model the player, walls and arena. The discrete case also presents various quirks that cause many implementations to violate desirable properties such as symmetry (point A can see point B if and only if B can see A) and contiguousness of field of view (see the &ldquo;No artifacts&rdquo; section in this <a href="https://www.albertford.com/shadowcasting/" target="_blank" rel="noreferrer">lovely article</a> on shadowcasting with bevelled walls for an example of artifacts).</p>
+<p>The approach used here is described in this page on <a href="https://www.roguebasin.com/index.php?title=Pre-Computed_Visibility_Tries" target="_blank" rel="noreferrer">Pre-Computed Visibility Tries</a> (though I don&#8217;t really get how the data structure is a trie). This approach has the advantage that all lines drawn are themselves discrete, so no artifacts are created through mapping the discrete to the continuous world.</p>
+<p>Though this page used Bresenham&#8217;s circle algorithm for the diagrams, existing implementations use the naïve approach, leading to poor circles. It works as follows: you draw all possible rays from the origin within the view circle using Bresenham&#8217;s (again) line algorithm and pre-calculate a tree of all paths. (Individual points may occur multiple times in the tree on mutually distinct paths.) Then field of view can be calculated with a simple tree search stopping at walls.</p>
+<p>There are two modifications I made to the algorithm as described. First, Bresenham&#8217;s line algorithm isn&#8217;t symmetric&mdash;many cases such as</p>
+
+<pre style="text-align: center;"><code>
+XX             X  
+  X             XX
+</code></pre>
+
+<p>are ambiguous and the algorithm need only consistently bias one case. The linked implementation gains symmetry by choosing one bias arbitrarily. I think morally both ought to be considered instead of choosing one arbitrarily, so I rectify this instead by drawing every line with both biases. (With a typical implementation of Bresenham&#8217;s line algorithm, this can be done easily by swapping the start and end point.)</p>
+<p>Secondly, drawing a ray to all points within the circle as described does not draw all possible Bresenham rays from the circle&mdash;plenty of angles are missed out. By considering extremely narrow angles it can be shown that some points up to a circle of radius ~2R must be considered, but I couldn&#8217;t work out what bounding shape is needed to draw all possible rays within a circle (or any other algorithm that simply generates them)&mdash;it would be helpful if someone could work this out! I chose a square of side length (4R+1) centred on the origin as I saw no extra lines from larger boxes, but as these trees are pre-calculated anyway, you could use a massive region if you were worried about this&mdash;it makes no difference. You need to modify the algorithm to stop when the line leaves the view circle.</p>
+<p>With these amendments, this algorithm defines line of sight as the following: a point A can be seen from the origin if and only if there is a Bresenham ray with either direction bias consisting of points (0,0)=L0,L1,L2,...,L[n-1] such that A = Lk for some 0&lt;=k&lt;n and no points Li for 1&lt;=i&lt;k are walls. I think this definition is the most natural discrete analogue of the continuous case and it also satisfies several ideal properties such as attractive behaviour when close to walls, symmetry, and contiguity of field of view. It is certainly on the permissive side of visibility&mdash;if less is desired, considering only rays to points within the circle is a reasonable trick to cut down on the most unusual angles. (Seeing through diagonally-placed walls may be disconcerting, but I understand that it is a long-standing tradition in the roguelike genre.) The pre-calculated trees for a given radius make its calculation extremely cheap.</p>
+</div>
 
 <style>
 @font-face {
@@ -37,10 +70,11 @@ body {
     font-family: "Fira Mono";
     width: 100%;
     height: 100%;
-    overflow: hidden;
 }
 
-#grid { color: #999;/*#3c3c3c*/; z-index: 2; }
+code { font-family: "Fira Mono"; font-size: 80%; }
+
+#grid, #test-grid { color: #999;/*#3c3c3c*/; z-index: 2; }
 
 #background-grid-div { position: absolute; }
 #background-grid { color: #3a3a3a; z-index: 1; }
@@ -50,6 +84,10 @@ body {
     /* display: block; */
 }
 
+#how {
+    width: 500px;
+    margin: 200px auto 400px auto;
+}
 .n { color: #ccc; } .a { color: #D04611; }
 </style>
 
@@ -112,44 +150,47 @@ const drawFilledCircle = (radius) => {
     return points;
 }
 
-
-
 const pointsEq = (a,b) => a[0] === b[0] && a[1] === b[1];
 
-class Tree {
-    constructor(point, children) {
-        this.point = point;
-        this.children = children;
-    }
-
-    cs() {
-        return this.children.map(t => t.point);
-    }
-}
-
-const addLineToTree = (root, i, j, reverse, circlePoints) => {
-    let currentTree = root;
+const addLineToTree = (treeData, i, j, reverse, circlePoints) => {
+    let currentIdx = 0;
+    const treeArray = treeData.treeArray;
+    const backPaths = treeData.backPaths;
+    let currentTree = treeArray[0];
     const start = [0,0];
     const end = [i,j];
     let line = reverse
         ? drawLine(end, start).reverse()
         : drawLine(start, end);
-    for (const p of line) {
+    // every line starts with [0,0], remove it
+    for (const p of line.slice(1, line.length)) {
         if (!circlePoints.has(pointToStr(p))) {
             break;
         }
-        let child = currentTree.children.find(t => pointsEq(t.point, p));
-        if (child === undefined) {
-            child = new Tree(p, []);
-            currentTree.children.push(child);
+        // each entry in treeArray is a list of pairs [i, p] where i is the index and p is the point.
+        let childData = currentTree.find(t => pointsEq(t.point, p));
+        let child = null;
+        let newIdx;
+        if (childData === undefined) {
+            child = [];
+            treeArray.push(child);
+            newIdx = treeArray.length-1;
+            currentTree.push({index: treeArray.length-1, point: p});
+        } else {
+            child = treeArray[childData.index];
         }
-
         currentTree = child;
     }
 }
 
+/// Builds a visibility tree. The tree is stored in an array of arrays
+/// [childIndices] where point is of the form [x,y] and [childIndices]
+/// is a list of array indices to the node's children. tree[0] is the root.
 const buildTree = (radius) => {
-    const root = new Tree([0,0], []);
+    const treeData = {
+        treeArray: [[]],
+        backPaths: new Map(),
+    };
     const pointsToDrawLinesTo = [];
     // Open question: How many cells do you have to check to get all
     // possible lines within a given radius? Checking only cells
@@ -159,7 +200,7 @@ const buildTree = (radius) => {
     //
     // The best thing to do is probably to try some ridiculously large
     // number and properly pre-calculate the trees rather than
-    // do them on page load as I'm doing here.
+    // do them on page load as I&'m doing here.
     for (let i = -2*radius; i <= 2*radius; i++) {
         for (let j = -2*radius; j <= 2*radius; j++) {
             pointsToDrawLinesTo.push([i,j]);
@@ -167,15 +208,15 @@ const buildTree = (radius) => {
     }
     const circlePoints = drawFilledCircle(radius);
 
-    for (const [i,j] of pointsToDrawLinesTo) {
+    for (const [i,j] of pointsToDrawLinesTo) {//Array.from(circlePoints).map(pointFromStr)) {
         // Allow for biasing even splits both ways in the line-drawing
         // algorithm for extra viewability.
         for (const reverse of [false, true]) {
-            addLineToTree(root, i, j, reverse, circlePoints);
+            addLineToTree(treeData, i, j, reverse, circlePoints);
         }
     }
 
-    return root;
+    return treeData;
 }
 
 const pointToStr = p => `${p[0]},${p[1]}`;
@@ -184,15 +225,27 @@ const pointFromStr = s => s.split(",").map(i => parseInt(i));
 const getVisiblePoints = (initialPoint, blocksVisibility, visibilityTree) => {
     const [x,y] = initialPoint;
     const visiblePoints = new Set();
+    const treeArray = visibilityTree.treeArray;
+    const backPaths = visibilityTree.backPaths;
+    const noBackPath = new Set();
     // I hate JavaScript
-    const stack = [visibilityTree];
+    const stack = [{point: [0,0], childrenData: treeArray[0]}];
     while (stack.length > 0) {
         const nextTree = stack.pop();
         const [i,j] = nextTree.point;
+        const strPoint = pointToStr(nextTree.point);
         const translatedPoint = [x+i,y+j];
+        if (!noBackPath.has(strPoint)) {
+
+        }
+        backPaths[pointToStr(nextTree.point)] = 
+
+        // if backpath check then
         visiblePoints.add(pointToStr(translatedPoint));
         if (!blocksVisibility(translatedPoint)) {
-            stack.push(...nextTree.children);
+            stack.push(...nextTree.childrenData.map(t_i => {
+                return {point: t_i.point, childrenData: treeArray[t_i.index]};
+            }));
         }
     }
 
@@ -203,9 +256,9 @@ const getVisiblePoints = (initialPoint, blocksVisibility, visibilityTree) => {
 
 const WIDTH = 100;
 const HEIGHT = 35;
-let CURRENT_RADIUS = 13;
+let CURRENT_RADIUS = 12;
 const MIN_RADIUS = 5;
-const MAX_RADIUS = 25;
+const MAX_RADIUS = 22;
 const WALL_LIKELIHOOD = 0.075;
 
 const TREES = [];
@@ -237,12 +290,12 @@ const arrSetIndex = (arr, p, v) => {
 }
 
 
-const genWallArray = () => {
+const genWallArray = prob => {
     const arr = [];
     for (let j = 0; j < HEIGHT; j++) {
         const row = [];
         for (let i = 0; i < WIDTH; i++) {
-            row.push(Math.random() < WALL_LIKELIHOOD);
+            row.push(Math.random() < prob);
         }
         arr.push(row);
     }
@@ -251,7 +304,7 @@ const genWallArray = () => {
 }
 
 let player = [Math.floor(WIDTH/2), Math.floor(HEIGHT/2)];
-let WALL_ARRAY = genWallArray();
+let WALL_ARRAY = genWallArray(WALL_LIKELIHOOD);
 
 const blocksVisibility = point => !arrContains(WALL_ARRAY, point) || arrIndex(WALL_ARRAY, point);
 
@@ -296,6 +349,7 @@ const PLACE_LEFT = "PLACE_LEFT";
 const DECREASE_RADIUS = "DECREASE_RADIUS";
 const INCREASE_RADIUS = "INCREASE_RADIUS";
 const SHUFFLE = "SHUFFLE";
+const CLEAR = "CLEAR";
 const processKeyboardInput = code => {
     switch (code) {
         case "ArrowUp":    return UP;
@@ -310,6 +364,7 @@ const processKeyboardInput = code => {
         case "KeyQ":       return DECREASE_RADIUS;
         case "KeyE":       return INCREASE_RADIUS;
         case "KeyR":       return SHUFFLE;
+        case "KeyC":       return CLEAR;
         default:           return null;
     }
 }
@@ -327,7 +382,10 @@ const processLogicalInput = input => {
         }
         changed = true;
     } else if (input === SHUFFLE) {
-        WALL_ARRAY = genWallArray();
+        WALL_ARRAY = genWallArray(WALL_LIKELIHOOD);
+        changed = true;
+    } else if (input === CLEAR) {
+        WALL_ARRAY = genWallArray(0);
         changed = true;
     } else {
         switch (input) {

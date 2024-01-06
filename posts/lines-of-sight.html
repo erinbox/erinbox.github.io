@@ -152,8 +152,10 @@ const drawFilledCircle = (radius) => {
 
 const pointsEq = (a,b) => a[0] === b[0] && a[1] === b[1];
 
-const addLineToTree = (treeArray, i, j, reverse, circlePoints) => {
+const addLineToTree = (treeData, i, j, reverse, circlePoints) => {
     let currentIdx = 0;
+    const treeArray = treeData.treeArray;
+    const backPaths = treeData.backPaths;
     let currentTree = treeArray[0];
     const start = [0,0];
     const end = [i,j];
@@ -185,7 +187,10 @@ const addLineToTree = (treeArray, i, j, reverse, circlePoints) => {
 /// [childIndices] where point is of the form [x,y] and [childIndices]
 /// is a list of array indices to the node's children. tree[0] is the root.
 const buildTree = (radius) => {
-    const treeArray = [[]];
+    const treeData = {
+        treeArray: [[]],
+        backPaths: new Map(),
+    };
     const pointsToDrawLinesTo = [];
     // Open question: How many cells do you have to check to get all
     // possible lines within a given radius? Checking only cells
@@ -207,11 +212,11 @@ const buildTree = (radius) => {
         // Allow for biasing even splits both ways in the line-drawing
         // algorithm for extra viewability.
         for (const reverse of [false, true]) {
-            addLineToTree(treeArray, i, j, reverse, circlePoints);
+            addLineToTree(treeData, i, j, reverse, circlePoints);
         }
     }
 
-    return treeArray;
+    return treeData;
 }
 
 const pointToStr = p => `${p[0]},${p[1]}`;
@@ -220,16 +225,26 @@ const pointFromStr = s => s.split(",").map(i => parseInt(i));
 const getVisiblePoints = (initialPoint, blocksVisibility, visibilityTree) => {
     const [x,y] = initialPoint;
     const visiblePoints = new Set();
+    const treeArray = visibilityTree.treeArray;
+    const backPaths = visibilityTree.backPaths;
+    const noBackPath = new Set();
     // I hate JavaScript
-    const stack = [{point: [0,0], childrenData: visibilityTree[0]}];
+    const stack = [{point: [0,0], childrenData: treeArray[0]}];
     while (stack.length > 0) {
         const nextTree = stack.pop();
         const [i,j] = nextTree.point;
+        const strPoint = pointToStr(nextTree.point);
         const translatedPoint = [x+i,y+j];
+        if (!noBackPath.has(strPoint)) {
+
+        }
+        backPaths[pointToStr(nextTree.point)] = 
+
+        // if backpath check then
         visiblePoints.add(pointToStr(translatedPoint));
         if (!blocksVisibility(translatedPoint)) {
             stack.push(...nextTree.childrenData.map(t_i => {
-                return {point: t_i.point, childrenData: visibilityTree[t_i.index]};
+                return {point: t_i.point, childrenData: treeArray[t_i.index]};
             }));
         }
     }

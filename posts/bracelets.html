@@ -229,15 +229,133 @@ def B(ps: tuple[int]) -> int:
 
 <h2>Test</h2>
 
+<table id="colour-picker">
+  <tr>
+    <th id="colour-icon-1"></th>
+    <th id="colour-icon-2"></th>
+    <th id="colour-icon-3"></th>
+    <th id="colour-icon-4"></th>
+    <th id="colour-icon-5"></th>
+    <th id="colour-icon-6"></th>
+    <th id="colour-icon-7"></th>
+    <th id="colour-icon-8"></th>
+  </tr>
+  <tr>
+    <td><input type="number" id="picker-1" name="picker-1" min="0" max="8" value="4" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-2" name="picker-2" min="0" max="8" value="2" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-3" name="picker-3" min="0" max="8" value="1" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-4" name="picker-4" min="0" max="8" value="0" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-5" name="picker-5" min="0" max="8" value="0" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-6" name="picker-6" min="0" max="8" value="0" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-7" name="picker-7" min="0" max="8" value="0" onchange="changedColour()"></td>
+    <td><input type="number" id="picker-8" name="picker-8" min="0" max="8" value="0" onchange="changedColour()"></td>
+  </tr>
+  <tr><td colspan="8">Total beads: <span id="bead-total">7</span></td></tr>
+  <tr><td colspan="8">Total bracelets: <span id="bracelet-total">9</span></td></tr>
+</table>
+
 <div id="test-div">
 Yay
 </div>
 
 <script>
+function* permutations(permutation) {
+  var length = permutation.length,
+      c = Array(length).fill(0),
+      i = 1, k, p;
+
+  yield permutation.slice();
+  while (i < length) {
+    if (c[i] < i) {
+      k = i % 2 && c[i];
+      p = permutation[i];
+      permutation[i] = permutation[k];
+      permutation[k] = p;
+      ++c[i];
+      i = 1;
+      yield permutation.slice();
+    } else {
+      c[i] = 0;
+      ++i;
+    }
+  }
+}
+
+const mod = (n, m) => ((n % m) + m) % m;
+
+function* braceletSymmetries(permutation) {
+    const N = permutation.length;
+    for (let i = 0; i < N; i++) {
+        const arr = [];
+        for (let j = 0; j < N; j++) {
+            arr.push(permutation[mod(j-i,N)]);
+        }
+        yield arr;
+        const flippedArr = [];
+        for (let j = 0; j < N; j++) {
+            flippedArr.push(permutation[mod(-j-i,N)]);
+        }
+        yield flippedArr;
+    }
+}
+
+const listComp = (xs, ys) => {
+    for (let i = 0; i < Math.min(xs.length, ys.length); i++) {
+        const x_i = xs[i]; const y_i = ys[i];
+        if (x_i > y_i) { return 1; }
+        else if (x_i < y_i) { return -1; }
+    }
+
+    if (xs.length === ys.length)    { return 0; }
+    else if (xs.length > ys.length) { return 1; }
+    else                            { return -1; }
+}
+
+function allBracelets(multiplicities) {
+    const beads = [];
+    for (const [i, num] of multiplicities.entries()) {
+        for (let j = 0; j < num; j++) {
+            beads.push(i);
+        }
+    }
+    if (beads.length === 0) { return [[]]; }
+
+
+    const braceletSet = new Set();
+    for (const permutation of permutations(beads)) {
+        let minSoFar = null;
+        for (const bracelet of braceletSymmetries(permutation)) {
+            if (minSoFar === null) { minSoFar = bracelet; } else {
+                const comp = listComp(minSoFar, bracelet);
+                if (comp > 0) { minSoFar = bracelet };
+            }
+        }
+        braceletSet.add(JSON.stringify(minSoFar));
+    }
+    const finalList = [];
+    for (const braceletStr of braceletSet) {
+        finalList.push(JSON.parse(braceletStr));
+    }
+    finalList.sort(listComp);
+    return finalList;
+}
+
+
+// SVG
+
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 // red website accent colour
 // const COLOURS = ["#D04611", "#0DB1F8", "#F8F00D"];
-const COLOURS = ["#FF3705", "#00AFFA", "#FEE816"];
+const COLOURS = [
+    "#FF3705",  // red
+    "#00AFFA",  // blue
+    "#FEE816",  // yellow
+    "#8DEB00",  // green
+    "#3261f3",  // purple
+    "#ff872b",  // orange
+    "#ff7fed",  // pink
+    "#d35028",  // brown
+];
 const BEAD_RADIUS = 0.08;
 const WITHIN_SQUARE_PADDING = 0.10;
 const LINE_WIDTH = 0.015;
@@ -294,6 +412,69 @@ makeBracelet([0,0,1,0,2,0,1], 1, 2, example421);
 makeBracelet([0,0,1,1,0,0,2], 2, 2, example421);
 const example421Div = document.getElementById("example-4-2-1");
 example421Div.appendChild(example421);
+
+// const testDiv = document.getElementById("test-div");
+// const baseSvg = makeBaseSvg(400, 400, 4,4);
+// let i = 0;
+// for (const bracelet of allBracelets([2,2,3])) {
+//     makeBracelet(bracelet, i % 4, Math.floor(i / 4), baseSvg);
+//     i += 1;
+// }
+// baseSvg.setAttribute("viewBox", `0 0 ${4} ${Math.ceil(i/4)}`);
+// baseSvg.setAttribute("height", `${100*Math.ceil(i/4)}`);
+// testDiv.innerHTML = "";
+// testDiv.appendChild(baseSvg);
+
+NUM_COLOUR_PICKERS = 8;
+for (let i = 1; i <= NUM_COLOUR_PICKERS; i++) {
+    const svg = makeSvgElement("svg");
+    svg.setAttribute("width", `${100*(2*BEAD_RADIUS+2*LINE_WIDTH)}`);
+    svg.setAttribute("height", `${100*(2*BEAD_RADIUS+2*LINE_WIDTH)}`);
+    const o = -BEAD_RADIUS-LINE_WIDTH;
+    const s = 2*BEAD_RADIUS + 2*LINE_WIDTH;
+    svg.setAttribute("viewBox", `${o} ${o} ${s} ${s}`);
+    const icon = document.getElementById(`colour-icon-${i}`);
+    const bead = makeSvgElement("circle");
+    bead.setAttribute("cx", "0");
+    bead.setAttribute("cy", "0");
+    bead.setAttribute("r", `${BEAD_RADIUS}`);
+    bead.setAttribute("stroke", LINE_COLOUR);
+    bead.setAttribute("stroke-width", `${LINE_WIDTH}`);
+    bead.setAttribute("fill", COLOURS[i-1]);
+    svg.appendChild(bead);
+    icon.appendChild(svg);
+}
+MAX_BEADS = 10;
+const changedColour = (idx) => {
+    const pickers = [];
+    for (let i = 1; i <= NUM_COLOUR_PICKERS; i++) {
+        pickers.push(document.getElementById(`picker-${i}`));
+    }
+    const N = pickers.reduce((acc, p) => acc + p.valueAsNumber, 0);
+    const beadTotal = document.getElementById(`bead-total`);
+    beadTotal.innerText = `${N}`;
+    for (const picker of pickers) {
+        picker.setAttribute("max", `${MAX_BEADS-N+picker.valueAsNumber}`);
+    }
+
+    const bracelets = allBracelets(pickers.map(p => p.valueAsNumber));
+    const B = bracelets.length;
+
+    const braceletTotal = document.getElementById(`bracelet-total`);
+    braceletTotal.innerText = `${B}`;
+
+    // draw the bracelets
+    const testDiv = document.getElementById("test-div");
+    const baseSvg = makeBaseSvg(400, 400, 4,4);
+    for (const [i, bracelet] of bracelets.entries()) {
+        makeBracelet(bracelet, i % 4, Math.floor(i / 4), baseSvg);
+    }
+    baseSvg.setAttribute("viewBox", `0 0 ${4} ${Math.ceil(B/4)}`);
+    baseSvg.setAttribute("height", `${100*Math.ceil(B/4)}`);
+    testDiv.innerHTML = "";
+    testDiv.appendChild(baseSvg);
+}
+changedColour();
 </script>
 
 <!-- <h2>Bracelets made of $n$ beads given beads in $k$ colours</h2>

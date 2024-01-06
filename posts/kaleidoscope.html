@@ -209,6 +209,17 @@ body {
 
 <div id="live-solve-container"></div>
 <div id="solutions-container"></div>
+
+<div>
+  <h2>How it works</h2>
+  <p>The solver carries out the following steps, which are guaranteed to find all possible solutions eventually:</p>
+  <ol>
+    <li>For each remaining piece, take all the ways it can be placed on unfilled squares to match the puzzle colours. For each remaining square, take all the ways in which a remaining piece can be placed to cover it while matching the puzzle colours.</li>
+    <li>Take one of the pieces or board squares with the fewest number of options. Trying each possible option in turn, go back to step 1., noting that the piece just placed can&#8217;t be placed again and the squares it was placed on are now off limits. If all the pieces have been placed, covering all the squares, record a solution.</li>
+  </ol>
+  <p>More formally, the solver works by considering the puzzle as an exact cover problem. The above is a description of Algorithm X, the trial-and-error algorithm most often used to solve exact cover problems. The solver implements the &ldquo;dancing links&rdquo; data structure for efficiency. <a href="https://arxiv.org/pdf/cs/0011047.pdf" target="_blank" rel="noreferrer">Donald Knuth&#8217;s paper on the exact cover problem, Algorithm X and Dancing Links</a> is a highly readable introduction to the subject.</p>
+</div>
+
 <script src="dancing_links.js"></script>
 <script src="kaleidoscope-pieces.js"></script>
 <script src="kaleidoscope-svg.js"></script>

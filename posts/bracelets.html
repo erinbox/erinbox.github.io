@@ -1,0 +1,309 @@
+---
+title: How many bracelets can you make out of a set of coloured beads?
+layout: default
+categories: maths
+---
+
+<style>
+.bracelet-display {
+    margin: 30px auto 15px auto;
+    display: block;
+}
+
+caption {
+    font-size: 0.7;
+
+}
+</style>
+
+<p>Suppose you have \(a_0\) beads of one colour, \(a_1\) beads of a different colour and so on, with \(m\) colours in total. How many unique bracelets can you make using all the beads? (A bracelet is a loop of beads on a string that can be rotated and flipped over.)</p>
+
+<figure>
+  <div id="example-4-2-1"></div>
+  <figcaption>You can make \(9\) unique bracelets out of \(4\) red, \(2\) blue and \(1\) yellow beads.</figcaption>
+</figure>
+
+<p>The main difficulty of the problem is the fact that the number of permutations of beads that are equivalent under rotating and flipping is a non-trivial function of the bead layout. For example, only two different permutations become the bracelet \(\textsf{ABABAB}\) when the ends are tied together, but \(12\) different permutations become the bracelet \(\textsf{AABAAB}\). Therefore considering permutations is easiest.</p>
+
+<p>How many permutations of the bead set \(\langle a_0,\ldots,a_{m-1}\rangle\) are there? One way to think about it is to imagine labelling each bead of the same colour with a unique number, leaving \((a_0+\cdots+a_{m-1})!\) permutations, then dividing by the \(a_i!\) permutations of each set of same-coloured beads in turn. Another way is to imagine choosing the first \(a_0\) beads, then having \(\binom{a_0+a_1}{a_1}\) different ways to place the next colour set with the existing beads, then \(\binom{a_0+a_1+a_2}{a_2}\) ways to place the next colour set, and so on. Therefore the number of permutations is</p>
+
+
+\[\mathbb{P}\langle a_0,\ldots, a_{m-1}\rangle =\frac{(a_0+\cdots+a_{m-1})!}{a_0!\cdots a_{m-1}!}=\prod_{i=0}^{m-1}\binom{a_0+\cdots + a_{i}}{a_i}\text{.}
+\]
+
+<p>The main question is then how to count the number of equivalences of these permutations. For this we can use <a href="https://en.wikipedia.org/wiki/Burnside's_lemma" target="_blank" rel="noreferrer">Burnside&#8217;s lemma</a> which, loosely speaking, states that the number of unique objects under a group of symmetries is the average number of objects that remain unchained under each symmetry. Let \(N=a_0+\cdots+a_{m-1}\). In our case, our objects are permutations and we have \(2N\) symmetries: the first \(N\) symmetries rotate the bracelet by \(0,1,\ldots,N-1\) beads respectively, and the other \(N\) symmetries flip the bracelet over, then rotate by \(0,\ldots,N-1\) beads each. (Some may know this as the &ldquo;dihedral group of order \(2N\)&rdquo;.) Therefore the number of bracelets, which we will write \(\mathcal{B}\langle a_0,\ldots,a_{m-1}\rangle\), is given by</p>
+
+\[\begin{aligned}
+\mathcal{B}\langle a_0,\ldots,a_{m-1}\rangle &= \frac{1}{2N}\sum_{i=0}^{N-1} [(*_i) + (\dagger_i)]
+\end{aligned}\]
+
+<p>where</p>
+<ul>
+  <li>\((\ast_i)\) denotes the number of permutations fixed by a rotation by \(i\) beads;</li>
+  <li>\((\dagger_i)\) denotes the number of permutations fixed by a flip (reversal), then a rotation by \(i\) beads.</li>
+</ul>
+
+<p>(Burnside&#8217;s lemma requires \(N\) to be positive, so we have to handle the \(N=0\) case separately, in which case there is only \(1\) bracelet, the empty bracelet.)</p>
+
+<p>Let&#8217;s consider the \((\ast_i)\) term first. How many permutations of the beads are fixed by a shift of \(i\)? Exactly those of the form</p>
+
+\[\underbrace{C_{x_0}\ldots C_{x_{\gcd(N,i)-1}}}_{\text{repeated }N/\gcd(N,i)\text{ times}}\]
+
+<p>for some colours \(C_{x_j}\). For example, when \(N=6,i=4\), so \(\gcd(N,i)=2\), the bracelet \(\textsf{ABCDEF}\) moves to \(\textsf{EFABCD}\), so to stay fixed, it must be of the form \(\textsf{ABABAB}\). Therefore for there to be any permutations of this kind, there must be a multiple of \(b_i:=N/\gcd(N,i)\) beads of every colour, i.e. \(\gcd(a_0,\ldots, a_{m-1})\) must be a multiple of \(b_i\). If this is the case, then the number of permutations is the number of permutations of each \(\gcd(N,i)\)-sized cell, which is \(\mathbb{P}(a_0/b_i,\ldots,a_{m-1}/b_i)\). Otherwise there are \(0\).</p>
+
+<p>Now let&#8217;s consider the flipped case. A permutation is fixed by reversing it and shifting \(i\) to the right exactly when it consists of two adjacent palindromes of size \(i\) and \(N-i\) respectively. For example, when \(N=9,i=4\), \(\textsf{ABCDEFGHI}\) goes to \(\textsf{DCBAIHGFE}\), so to stay fixed it must be of the form \(\textsf{ABBAEFGFE}\). An even-length palindrome requires a multiple of two of every colour; an odd-length palindrome requires exactly one colour to have an odd multiplicity (for the central element) and every other colour to have an even multiplicity. Therefore for two palindromes we have the following cases:</p>
+
+<ul>
+<li>When \(i\) and \(N-i\) are both even, if all \(a_j\) are even there are \(\mathbb{P}(a_0/2,\ldots,a_{m-1}/2)\) matching permutations; otherwise there are \(0\).</li>
+<li>When one of \(i\) and \(N-i\) is even and one is odd, there are matching permutations exactly when there is one odd \(a_s\) and all the rest are even. In this case there are \(\mathbb{P}(a_0/2,\ldots,(a_s-1)/2,\ldots,a_{m-1}/2)\) palindromes (the central colour of the odd palindrome will be \(C_s\)). Otherwise there are \(0\).</li>
+<li>When \(i\) and \(N-i\) are both odd, if all \(a_j\) are even we have the same number of matching permutations as when \(i,N-i\) were both even. But there is the additional case of exactly two distinct odd \(a_s,a_t\) with the rest even, in which case there are \(2\cdot\mathbb{P}(a_0/2,\ldots,(a_s-1)/2,\ldots,(a_t-1)/2,\ldots,a_{m-1}/2)\) matching permutations. Otherwise there are \(0\).</li>
+</ul>
+
+<p>Phew! Therefore we can write the solution as</p>
+
+\[
+\mathcal{B}\langle a_0,\ldots,a_{m-1}\rangle=\frac{1}{2N}\sum_{i=0}^{N-1} (S_i + R_i)
+\]
+
+<p>where</p>
+
+\[\begin{aligned}
+N&:=a_0+\cdots+a_{m-1}\text{;}\\[1.2em]
+S_i &:= \begin{cases}
+\mathbb{P}\langle a_0/b_i,\ldots,a_{m-1}/b_i\rangle & b_i \text{ divides} \gcd(a_0,\ldots,a_{m-1}) \\
+0 & \text{otherwise;}
+\end{cases}\\[2.5em]
+b_i&:=N/\gcd(N,i)\text{;}\\[1.4em]
+
+R_i &:= \begin{cases}
+(*_0) & \text{both } i,N-i\text{ even}, \text{all }a_j\text{ even} \\
+(*_1) & \text{one } i,N-i \text{ even, one odd}, \text{exactly one } a_s \text{ odd} \\
+(*_0) & \text{both } i,N-i\text{ odd}, \text{all }a_j\text{ even} \\
+(*_2) & \text{both } i,N-i \text{ odd}, \text{exactly two } a_s,a_t \text{ odd} \\
+0 & \text{otherwise;}
+\end{cases}\\[4.5em]
+
+(*_0)&:=\mathbb{P}(a_0/2,\ldots,a_{m-1}/2)\\
+(*_1)&:=\mathbb{P}(a_0/2,\ldots,(a_s-1)/2,\ldots,a_{m-1}/2)\\
+(*_2)&:=2\cdot\mathbb{P}(a_0/2,\ldots,(a_s-1)/2,\ldots,(a_t-1)/2,\ldots,a_{m-1}/2)\text{.}
+\end{aligned}\]
+
+<h2>Improvement</h2>
+
+<p>The answer as just given is as a summation from \(0\) to \(N-1\), most of whose terms are empty. We shall now look at making this sum more efficient.</p>
+
+<p>We shall start with the flipped case as it is simpler. Firstly, we can use the expression \(\lfloor a_j/2\rfloor\) to avoid distinguishing between even and odd terms. Next, observe that if \(N\) is odd, then one of \(i\) and \(N-i\) is always odd and the other even. If \(N\) is even, both \(i\) and \(N-i\) are even for half the summation values and odd for the other half. If all \(a_j\)s are even, every case counts equally. If there exactly two odd \(a_j\)s, then the even case counts for \(0\) and the odd case counts twice. In all cases, we can write</p>
+
+\(\begin{aligned}
+R&:=\sum_{i=0}^{N-1}R_i=\begin{cases}
+N\cdot\mathbb{P} (\lfloor a_0/2\rfloor, \ldots,\lfloor a_{m-1}/2\rfloor) & (\dagger)\\
+0 & \text{otherwise;}
+\end{cases}\\[2em]
+(\dagger)&:=(N \text{ odd} \mathrel{\&} o=1) \mathrel{\text{or}} (N \text{ even} \mathrel{\&} o\in\{0,2\})\\[1em]
+\end{aligned}\)
+
+<p>where \(o\) is the number of odd \(a_j\). (Some of this convenient simplification is coincidental&mdash;there are factors of \(2\) introduced for unrelated reasons cancelling out.)</p>
+
+<p>Now for the non-flipped case. Since the only \(b\) values that can contribute to the term are divisors of \(\gcd(a_0,\ldots,a_{m-1})\), we can rewrite the sum as</p>
+
+\[\begin{aligned}
+S&:=\sum_{i=0}^{N-1} S_i=\sum_{b\mid \gcd(a_0,\ldots,a_{m-1})} k_b\cdot \mathbb{P}(a_0/b,\ldots, a_{m-1}/b)\\[2.3em]
+k_b &:= |\{0\leq i < N : \gcd(N,i)=N/b\}|\\
+&= |\{0\leq i < b : \gcd(b,i)= 1\}|\\
+&= \varphi(b)
+\end{aligned}\]
+
+<p>where \(\varphi\) is <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" target="_blank" rel="noreferrer">Euler&#8217;s totient function</a>. (Euler&#8217;s totient function sums over \(1 \leq i \leq b\) but since \(b>0\) we have \(\gcd(b,0)=\gcd(b,b)=b\) for all \(b\).)</p>
+
+<p>This is quite abstract, so let's illustrate it a concrete example: bead colours \(\langle 4, 2, 2, 2 \rangle\) so \(N=10\). \(\gcd(4,2,2,2)=2\). Drawing a table:</p>
+
+<table style="width: 95%;">
+  <tr><th>\(i\)</th><th>Matching permutations</th><th>Can our colours do it?</th></tr>
+  <tr><td>\(0\)</td><td>\(\textsf{ABCDEFGHIJ}\)</td><td>Yes</td></tr>
+  <tr><td>\(1\)</td><td>\(\textsf{AAAAAAAAAA}\)</td><td>No</td></tr>
+  <tr><td>\(2\)</td><td>\(\textsf{ABABABABAB}\)</td><td>No</td></tr>
+  <tr><td>\(3\)</td><td>\(\textsf{AAAAAAAAAA}\)</td><td>No</td></tr>
+  <tr><td>\(4\)</td><td>\(\textsf{ABABABABAB}\)</td><td>No</td></tr>
+  <tr><td>\(5\)</td><td>\(\textsf{ABCDEABCDE}\)</td><td>Yes</td></tr>
+  <tr><td>\(6\)</td><td>\(\textsf{ABABABABAB}\)</td><td>No</td></tr>
+  <tr><td>\(7\)</td><td>\(\textsf{AAAAAAAAAA}\)</td><td>No</td></tr>
+  <tr><td>\(8\)</td><td>\(\textsf{ABABABABAB}\)</td><td>No</td></tr>
+  <tr><td>\(9\)</td><td>\(\textsf{AAAAAAAAAA}\)</td><td>No</td></tr>
+</table>
+
+<p>\(k_b\) tells us for how many \(i\) the matching permutations consist of \(b\) repeating chunks. For example, when \(b=5\), \(k_b=|\{2,4,6,8\}|=\varphi(5)=4\).</p>
+
+<p>If we like, we can make one further optimisation by using the fact that we wish to calculate \(\varphi\) for the set of divisors of a number. One formula for \(\varphi\) is</p>
+
+\[
+\varphi(n)= p_0^{w_0-1}(p_0-1)\cdots p_{r-1}^{w_{r-1}-1}(p_{r-1}-1)
+\]
+
+<p>where \(p_0^{w_0}\cdots p_{r-1}^{w_{r-1}}\) is the prime factorisation of \(n\). Now assuming \(p_0^{w_0}\cdots p_{r-1}^{w_{r-1}}\) is the prime factorisation of \(\gcd(a_0,\ldots,a_{m-1})\), we can write</p>
+
+\[\begin{aligned}
+S:=\sum_{i=0}^{N-1} S_i&=\sum_{i_0=0}^{w_0}\cdots\sum_{i_{r-1}=0}^{w_{r-1}} \Phi_{\mathbf{i}}\cdot \mathbb{P}(a_0/b_{\mathbf{i}},\ldots, a_{m-1}/b_{\mathbf{i}})\\[2em]
+\Phi_{\mathbf{i}=i_0,\ldots,i_{r-1}}&:=\prod_{i_s>0}p_{s}^{i_s-1}(p_s-1)\\[1.8em]
+b_{\mathbf{i}=i_0,\ldots,i_{r-1}} &:=p_0^{i_0}\ldots p_{r-1}^{i_{r-1}}\text{.}
+\end{aligned}\]
+
+<h2>In short</h2>
+
+<p>In summary, then, given \(a_0\) beads of one colour, \(a_1\) of another colour and so on, with \(m\) colours in total, the number of bracelets using all the beads is</p>
+
+\[
+\mathcal{B}[a_0,\ldots,a_{m-1}]=\tfrac{1}{2N}(S+R)
+\]
+
+<p>where</p>
+
+\[\begin{aligned}N&:=a_0+\cdots+a_{m-1}\\[1.1em]
+S&:=\sum_{b\mid \gcd(a_0,\ldots,a_{m-1})} \varphi(b)\cdot \mathbb{P}(a_0/b,\ldots, a_{m-1}/b)\\[2.2em]
+\mathbb{P}(x_0,\ldots,x_{Z-1})&:=\frac{(x_0+\cdots+x_{Z-1})!}{x_0!\cdots x_{Z-1}!}\\[1.5em]
+&=\prod_{i=0}^{Z-1}\binom{x_0+\cdots + x_{i}}{x_i}
+\end{aligned}\]
+
+<p>and \(\varphi\) denotes Euler&#8217;s totient function, or equivalently</p>
+
+$$\begin{aligned}
+S&:=\sum_{i_0=0}^{w_0}\cdots\sum_{i_{r-1}=0}^{w_{r-1}} \Phi_\mathbf{i}\cdot \mathbb{P}(a_0/b_\mathbf{i},\ldots, a_{m-1}/b_\mathbf{i})\\[2em]
+\Phi_{\mathbf{i}= i_0,\ldots,i_{r-1}}&:=\prod_{i_s>0}p_{s}^{i_s-1}(p_s-1)\\[1.8em]
+b_{\mathbf{i}= i_0,\ldots,i_{r-1}}&:= p_0^{i_0}\cdots p_{r-1}^{i_{r-1}}\\[1.0em]
+p_0^{w_0}\cdots p_{r-1}^{w_{r-1}}&:=\text{prime factorisation of }\gcd(a_0,\ldots,a_{m-1})\text{,}
+\end{aligned}$$
+
+<p>and</p>
+
+
+$$\begin{aligned}
+R&:=\begin{cases}
+N\cdot\mathbb{P} (\lfloor a_0/2\rfloor, \ldots,\lfloor a_{m-1}/2\rfloor) & (\dagger)\\
+0 & \text{otherwise}
+\end{cases}\\[2em]
+(\dagger)&:=(N \text{ odd} \mathrel{\&} o=1) \mathrel{\text{or}} (N \text{ even} \mathrel{\&} o\in\{0,2\})\\
+\end{aligned}$$
+
+<p>where \(o\) is the number of \(a_j\) which are odd.</p>
+
+<h2>Code</h2>
+
+<div style="height: 600px; overflow-y: scroll; background-color: #eee; border-radius: 20px; padding: 20px; margin: 25px 0px 30px 0px;">
+<pre style="margin: 0;"><code>from itertools import permutations, product
+from math import gcd, comb
+
+def get_prime_factors(n: int) -> dict[int, int]:
+    if n < 1: raise Exception("`n` must be a positive integer.")
+    result = {}; i = 2
+    while True:
+        times = 0
+        while n % i == 0: n //= i; times += 1
+        if times > 0: result[i] = times
+        if n == 1: break
+        i += 1
+    return result
+
+def P(ps: tuple[int]) -> int:
+    result = 1; total = 0
+    for p in ps: total += p; result *= comb(total, p)
+    return result
+
+def S(ps: tuple[int], N: int) -> int:
+    fa = get_prime_factors(gcd(*ps)); primes = list(fa.keys()); result = 0
+    for i_js in product(*(range(w_j+1) for w_j in fa.values())):
+        b = 1; Phi = 1
+        for (idx, i_j) in enumerate(i_js):
+            p_j = primes[idx]; b *= p_j**i_j
+            if i_j > 0: Phi *= p_j**(i_j-1) * (p_j-1)
+        result += Phi * P(tuple(p // b for p in ps))
+    return result // N
+
+def R(ps: tuple[int], N: int) -> int:
+    o = sum(1 for p in ps if p % 2 == 1)
+    return (P(tuple(p//2 for p in ps))
+        if (N % 2 == 1 and o == 1) or (N % 2 == 0 and o in [0,2])
+        else 0)
+
+def B(ps: tuple[int]) -> int:
+    N = sum(ps); return (S(ps, N) + R(ps, N)) // 2</code></pre></div>
+
+<button style="padding: 8px 200px; margin: auto; display: block; cursor: pointer;" onclick="copyCode()">Copy</button>
+
+<h2>Test</h2>
+
+<div id="test-div">
+Yay
+</div>
+
+<script>
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+// red website accent colour
+// const COLOURS = ["#D04611", "#0DB1F8", "#F8F00D"];
+const COLOURS = ["#FF3705", "#00AFFA", "#FEE816"];
+const BEAD_RADIUS = 0.08;
+const WITHIN_SQUARE_PADDING = 0.10;
+const LINE_WIDTH = 0.015;
+const LINE_COLOUR = "#000000";
+const makeSvgElement = name => document.createElementNS(SVG_NAMESPACE, name);
+
+// Makes a base SVG with the right dimensions.
+const makeBaseSvg = (width, height, numRows, numCols) => {
+    const svg = makeSvgElement("svg");
+    svg.setAttribute("width", `${width}`);
+    svg.setAttribute("height", `${height}`);
+    svg.setAttribute("viewBox", `0 0 ${numCols} ${numRows}`);
+    // TODO: make class
+    svg.classList.add("bracelet-display");
+    // svg.style["shape-rendering"] = "crispEdges";
+    return svg;
+}
+
+const makeBracelet = (colours, x, y, baseSvg) => {
+    const loop = makeSvgElement("circle");
+    const r = 0.5*(1-2*WITHIN_SQUARE_PADDING-2*BEAD_RADIUS);
+    loop.setAttribute("cx", `${x+0.5}`);
+    loop.setAttribute("cy", `${y+0.5}`);
+    loop.setAttribute("r", `${r}`);
+    loop.setAttribute("stroke", LINE_COLOUR);
+    loop.setAttribute("stroke-width", LINE_WIDTH);
+    loop.setAttribute("fill", "none");
+    baseSvg.appendChild(loop);
+
+    const N = colours.length;
+    for (const [i, colour] of colours.entries()) {
+        const bead = makeSvgElement("circle");
+        const theta = 2*Math.PI*i / N;
+        bead.setAttribute("cx", `${x+0.5+r*Math.sin(theta)}`);
+        bead.setAttribute("cy", `${y+0.5-r*Math.cos(theta)}`);
+        bead.setAttribute("r", `${BEAD_RADIUS}`);
+        bead.setAttribute("stroke", LINE_COLOUR);
+        bead.setAttribute("stroke-width", `${LINE_WIDTH}`);
+        bead.setAttribute("fill", COLOURS[colour]);
+        baseSvg.appendChild(bead);
+    }
+    return loop;
+}
+
+const example421 = makeBaseSvg(300, 300, 3,3);
+makeBracelet([0,0,0,0,1,1,2], 0, 0, example421);
+makeBracelet([0,0,0,0,1,2,1], 1, 0, example421);
+makeBracelet([0,0,0,1,0,1,2], 2, 0, example421);
+makeBracelet([0,0,0,1,0,2,1], 0, 1, example421);
+makeBracelet([0,0,0,1,1,0,2], 1, 1, example421);
+makeBracelet([0,0,1,0,0,1,2], 2, 1, example421);
+makeBracelet([0,0,1,0,1,0,2], 0, 2, example421);
+makeBracelet([0,0,1,0,2,0,1], 1, 2, example421);
+makeBracelet([0,0,1,1,0,0,2], 2, 2, example421);
+const example421Div = document.getElementById("example-4-2-1");
+example421Div.appendChild(example421);
+</script>
+
+<!-- <h2>Bracelets made of $n$ beads given beads in $k$ colours</h2>
+
+I wasn&#8217;t able to find the previous question answered online anywhere, but there are plenty of references to this related problem given an unlimited number of beads in $k$ colours. By simpler versions of the same arguments above it can be shown that the number of bracelets of $n$ beads in $k$ colours is
+
+$$
+\mathcal{B}_{n,k}=\frac{1}{2n}\left(\sum_{d\mid n}\left(\varphi(d) \cdot k^{n/d}\right) + \begin{cases}
+nk^{(n+1)/2} & n\text{ odd} \\
+\frac{1}{2}n(k+1)k^{n/2} & n\text{ even}\\
+\end{cases}\right)\text{.}
+$$ -->

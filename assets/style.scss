@@ -97,7 +97,9 @@ $body-text-size: 21px;
 $body-line-spacing: 1.45;
 $bg-color: #FFFFFF;
 $text-color: #000000;
+$lighter-text-color: #888;
 $accent-color: #D04611;
+$body-width: 607px;
 
 @mixin hyphenate {
     -webkit-hyphens: auto;
@@ -124,7 +126,7 @@ body {
     color: $text-color;
     background-color: $bg-color;
     line-height: $body-line-spacing;
-    max-width: 580px;
+    max-width: $body-width;
     margin: 50px auto 220px auto;
     font-feature-settings: "liga";
     // @include hyphenate;
@@ -266,7 +268,7 @@ footer {
 
 code {
     font-family: $monospaced-font;
-    font-size: $body-text-size * 0.9;
+    font-size: $body-text-size * 0.7;
 }
 
 hr.hr-footer {
@@ -278,13 +280,18 @@ hr.hr-footer {
 //     content: "⁂";
 // }
 
-
+figcaption {
+    font-size: $body-text-size * 0.75;
+    font-family: $sans-serif-font;
+    color: $lighter-text-color;
+    text-align: center;
+}
 
 
 span.custom-tag {
     @include small-caps;
     font-size: $body-text-size * 0.8;
-    color: #888;
+    color: $lighter-text-color;
     background-color: #F0F0F0;
     border-radius: 5px;
     padding-left: 3px;

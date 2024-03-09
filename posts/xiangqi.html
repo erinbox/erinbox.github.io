@@ -1,0 +1,131 @@
+---
+title: Xiangqi
+layout: default
+categories: games
+---
+
+<pre>
+    <code>
+<div id="xiangqi-board"></div>
+</code>
+</pre>
+
+<script>
+GENERAL = "General";
+ADVISOR = "Advisor";
+ELEPHANT = "Elephant";
+HORSE = "Horse";
+CHARIOT = "Chariot;"
+CANNON = "Cannon";
+SOLDIER = "Soldier";
+BLACK = "Black";
+RED = "Red";
+
+
+const PIECES_TO_CHARS = new Map([
+    [GENERAL, new Map([[BLACK, "將"], [RED, "帥"]])],
+    [ADVISOR, new Map([[BLACK, "士"], [RED, "仕"]])],
+    [ELEPHANT, new Map([[BLACK, "象"], [RED, "相"]])],
+    [HORSE, new Map([[BLACK, "馬"], [RED, "傌"]])],
+    [CHARIOT, new Map([[BLACK, "車"], [RED, "俥"]])],
+    [CANNON, new Map([[BLACK, "砲"], [RED, "炮"]])],
+    [SOLDIER, new Map([[BLACK, "卒"], [RED, "兵"]])],
+]);
+
+const pieceToChar = pieceAndColour => {
+    const [piece, colour] = pieceAndColour;
+    
+}
+
+class XiangqiBoard {
+    constructor() {
+        const backRow = [CHARIOT, HORSE, ELEPHANT, ADVISOR, GENERAL, ADVISOR, ELEPHANT, HORSE, CHARIOT];
+        const thirdRow = [null, CANNON, null, null, null, null, null, CANNON, null];
+        const fourthRow = [SOLDIER, null, SOLDIER, null, SOLDIER, null, SOLDIER, null, SOLDIER];
+        const empty = () => [null, null, null, null, null, null, null, null, null];
+        const addColour = (pieceRow, colour) => pieceRow.map(p => p === null ? null : [p, colour]);
+        this.board = [
+            addColour(backRow, BLACK),
+            empty(),
+            addColour(thirdRow, BLACK),
+            addColour(fourthRow, BLACK),
+            empty(),
+            empty(),
+            addColour(fourthRow, RED),
+            addColour(thirdRow, RED),
+            empty(),
+            addColour(backRow, RED),
+        ];
+        this.currentPlayer = RED;
+    }
+
+    toString() {
+        return this.board.map(row =>
+            row.map(pc => {
+                if (pc === null) { return " "; }
+                const [p,c] = pc;
+                return PIECES_TO_CHARS.get(p).get(c);
+            })
+            .join("")).join("\n");
+    }
+
+ 
+    static legalBoardIndex(x,y) {
+        return 0 <= x && x <= 8 && 0 <= y && y <= 9;
+    }
+
+    /// Gets an array of legal positions of the piece at column i (1-9), row j (1-10).
+    /// If i,j are invalid or there is no piece here or it's not that player's turn, return null.
+    legalMoves(i,j) {
+        const [x,y] = [i-1, 10-j];
+        if (!XiangqiBoard.legalBoardIndex(x,y)) {
+            return null;
+        }
+        const piece = this.board[y][x];
+        if (piece === null) {
+            return null;
+        }
+        const [pieceType, colour] = piece;
+        if (colour !== this.currentPlayer) {
+            return null;
+        }
+
+        const movesDisregardingCheck = [];
+        // get moves before checking for check
+        switch (pieceType) {
+            case GENERAL:
+                const directions = [[1,0], [0,1], [-1,0], [0,-1]];
+                for (const [a,b] of directions) {
+                    const [x1,y1] = [x+a,y+b];
+                    if (XiangqiBoard.legalBoardIndex(x1,y1)) {
+                        const newPos = this.board[y1][x1];
+                        if (newPos === null || newPos[1] !== this.currentPlayer) {
+                            movesDisregardingCheck.push([x1,y1]);
+                        }
+                    }
+                }
+                break;
+            case ADVISOR:
+                break;
+            case ELEPHANT:
+                break;
+            case HORSE:
+                break;
+            case CHARIOT:
+                break;
+            case CANNON:
+                break;
+            case SOLDIER:
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
+
+const board = new XiangqiBoard();
+const div = document.getElementById("xiangqi-board");
+div.innerHTML = board.toString();
+</script>

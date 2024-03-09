@@ -1,0 +1,683 @@
+---
+title: Drawing presentable trees in linear time&colon; the state of the art is imperfect
+layout: default
+categories: maths, computer science
+---
+
+<div id="test-tree-location"></div>
+
+<p>This is a very brief summary. For more information, see the paper <em><a href="https://link.springer.com/content/pdf/10.1007/3-540-36151-0_32.pdf" target="_blank" rel="noreferrer">Improving Walker&#8217;s Algorithm
+ to Run in Linear Time</a></em> by Buchheim&nbsp;et&nbsp;al. and the write-up <em><a href="https://llimllib.github.io/pymag-trees/" target="_blank" rel="noreferrer">Drawing Presentable Trees</a></em> by Bill Mill.</p>
+
+<p>The algorithm draws \(n\)-ary trees satisfying the following aesthetic criteria:</p>
+
+<ul>
+  <li>The \(y\)-coordinate of a node is its depth.</li>
+  <li>There is a minimum distance between nodes of the same depth (here set to the same as the distance between depth levels).</li>
+  <li>Parents are drawn midway between their leftmost and rightmost children.</li>
+  <li>For any tree, the mirror image of its drawing is the drawing of its mirror image.</li>
+  <li>The drawing of any subtree of a tree is equivalent to its drawing in the wider tree. [rephrase]</li>
+  <li>Inner child nodes are roughly evenly spaced out.*</li>
+  <li>Every set of children is drawn as close together as possible subject to the rest of the constraints.**</li>
+</ul>
+
+<p>Using a host of concepts colourfully named mods, contours, threads and ancestors, the algorithm runs in time linear in the number of nodes in the tree.</p>
+
+<h2>The problems</h2>
+
+<p>There are two main problems with this algorithm. The first is that &ldquo;dangling&rdquo; inner nodes are not spaced out optimally evenly. For example, the children of the root of the tree below could be equally spaced apart, but are not:</p>
+
+<div id="sad-tree"></div>
+
+<p>Here is the tree manually edited to accomplish this:</p>
+
+<div id="fixed-sad-tree"></div>
+
+<p>I have not been able to find any recognition of this problem in the literature, though Buchheim&nbsp;et&nbsp;al. were probably aware of it. The original author of the extension to \(n\)-ary trees (Walker) claimed his algorithm spaced out children optimally, but he also claimed his algorithm ran in linear time when it was in fact quadratic.</p>
+
+<p>At some point I would like to see if I can improve the child node spacing of this algorithm while keeping running time linear. Even spacing is not always possible due to conflicts, but one could imagine defining a penalty term on inner child node spacings to minimise.</p>
+
+<p>The second and more serious problem is that placing all siblings as close together as possible can cause ugly trees. This is most obvious with sibling nodes that vary greatly in the width of their offspring, as in the following tree:</p>
+
+<div id="ugly-tree"></div>
+
+<p>It is possible that drawing trees in a &ldquo;straight-line&rdquo; manner will make this ugly. For example:</p>
+
+<div id="ugly-tree-square"></div>
+
+<h2>Try formalising it?</h2>
+
+<p>Define a tree as an ordered list of trees. (We will only consider well-founded trees here.) For example, <code>[[[][]][[[][[][]][]][][[][]]][[][][][[][][][]][]]]</code> is a tree (the tree at the top of this page). The children of a tree are the trees comprising it.</p>
+
+
+<script>
+/**
+ * @license MIT
+ * @copyright 2020 Eyas Ranjous <eyas.ranjous@gmail.com>
+ *
+ * @class
+ */
+class Queue {
+  /**
+   * Creates a queue.
+   * @param {array} [elements]
+   */
+  constructor(elements) {
+    this._elements = Array.isArray(elements) ? elements : [];
+    this._offset = 0;
+  }
+
+  /**
+   * Adds an element to the back of the queue.
+   * @public
+   * @param {number|string|object} element
+   */
+  enqueue(element) {
+    this._elements.push(element);
+    return this;
+  }
+
+  /**
+   * Adds an element to the back of the queue.
+   * @public
+   * @param {number|string|object} element
+   */
+  push(element) {
+    return this.enqueue(element);
+  }
+
+  /**
+   * Dequeues the front element in the queue.
+   * @public
+   * @returns {number|string|object}
+   */
+  dequeue() {
+    if (this.size() === 0) return null;
+
+    const first = this.front();
+    this._offset += 1;
+
+    if (this._offset * 2 < this._elements.length) return first;
+
+    // only remove dequeued elements when reaching half size
+    // to decrease latency of shifting elements.
+    this._elements = this._elements.slice(this._offset);
+    this._offset = 0;
+    return first;
+  }
+
+  /**
+   * Dequeues the front element in the queue.
+   * @public
+   * @returns {number|string|object}
+   */
+  pop() {
+    return this.dequeue();
+  }
+
+  /**
+   * Returns the front element of the queue.
+   * @public
+   * @returns {number|string|object}
+   */
+  front() {
+    return this.size() > 0 ? this._elements[this._offset] : null;
+  }
+
+  /**
+   * Returns the back element of the queue.
+   * @public
+   * @returns {number|string|object}
+   */
+  back() {
+    return this.size() > 0 ? this._elements[this._elements.length - 1] : null;
+  }
+
+  /**
+   * Returns the number of elements in the queue.
+   * @public
+   * @returns {number}
+   */
+  size() {
+    return this._elements.length - this._offset;
+  }
+
+  /**
+   * Checks if the queue is empty.
+   * @public
+   * @returns {boolean}
+   */
+  isEmpty() {
+    return this.size() === 0;
+  }
+
+  /**
+   * Returns the remaining elements in the queue as an array.
+   * @public
+   * @returns {array}
+   */
+  toArray() {
+    return this._elements.slice(this._offset);
+  }
+
+  /**
+   * Clears the queue.
+   * @public
+   */
+  clear() {
+    this._elements = [];
+    this._offset = 0;
+  }
+
+  /**
+   * Creates a shallow copy of the queue.
+   * @public
+   * @return {Queue}
+   */
+  clone() {
+    return new Queue(this._elements.slice(this._offset));
+  }
+
+  /**
+   * Creates a queue from an existing array.
+   * @public
+   * @static
+   * @param {array} elements
+   * @return {Queue}
+   */
+  static fromArray(elements) {
+    return new Queue(elements);
+  }
+}
+
+class Tree {
+    // children should be a list of Trees
+    constructor(children) {
+        this.children = children;
+    }
+}
+
+class DrawTree {
+    constructor(tree, parent=null, depth=0, number=1) {
+        this.x = -1.0;
+        this.y = depth;
+        this.tree = tree;
+        this.children = [];
+        for (let i = 0; i < tree.children.length; i++) {
+            const c = tree.children[i];
+            this.children.push(new DrawTree(
+                c, this, depth+1, i+1,
+            ));
+        }
+        this.parent = parent;
+        this.thread = null;
+        this.offset = 0;
+        this.ancestor = this;
+        this.mod = 0;
+        this.change = 0;
+        this.shift = 0;
+        this.lmostSibling = null;
+        this.number = number;
+    }
+
+    left() {
+        if (this.thread !== null) {
+            return this.thread;
+        }
+        else if (this.children.length > 0) {
+            return this.children[0];
+        } else {
+            return null;
+        }
+    }
+
+    right() {
+        if (this.thread !== null) {
+            return this.thread;
+        }
+        else if (this.children.length > 0) {
+            return this.children[this.children.length-1];
+        } else {
+            return null;
+        }
+    }
+
+    leftBrother() {
+        let n = null;
+        if (this.parent !== null) {
+            for (const node of this.parent.children) {
+                if (node === this) {
+                    return n;
+                } else {
+                    n = node;
+                }
+            }
+        }
+        return n;
+    }
+
+    getLeftmostSibling() {
+        if (this.lmostSibling === null && this.parent !== null
+            && this !== this.parent.children[0]
+        ) {
+            this.lmostSibling = this.parent.children[0];
+        }
+        return this.lmostSibling;
+    }
+}
+
+const firstWalk = (v, distance=1.0) => {
+    if (v.children.length === 0) {
+        v.x = v.getLeftmostSibling() !== null
+            ? v.leftBrother().x + distance
+            : 0.0;
+    } else {
+        let defaultAncestor = v.children[0];
+        for (const w of v.children) {
+            firstWalk(w) // fix
+            defaultAncestor = apportion(
+                w,
+                defaultAncestor,
+                distance,
+            );
+        }
+        executeShifts(v);
+
+        const ell = v.children[0];
+        const arr = v.children[v.children.length-1];
+        const midpoint = (ell.x + arr.x) / 2;
+        const w = v.leftBrother();
+        if (w !== null) {
+            v.x = w.x + distance;
+            v.mod = v.x - midpoint;
+        } else {
+            v.x = midpoint;
+        }
+    }
+    return v;
+}
+
+const apportion = (v, defaultAncestor, distance) => {
+    const w = v.leftBrother();
+    if (w !== null) {
+        let vir = v;
+        let vor = v;
+        let vil = w;
+        let vol = v.getLeftmostSibling();
+        let sir = v.mod;
+        let sor = v.mod;
+        let sil = vil.mod;
+        let sol = vol.mod;
+        while (vil.right() !== null && vir.left() !== null) {
+            vil = vil.right();
+            vir = vir.left();
+            vol = vol.left();
+            vor = vor.right();
+            vor.ancestor = v;
+            const shift = (vil.x + sil) - (vir.x + sir) + distance;
+            if (shift > 0) {
+                const a = ancestor(vil, v, defaultAncestor);
+                moveSubtree(a, v, shift);
+                sir += shift;
+                sor += shift;
+            }
+            sil += vil.mod;
+            sir += vir.mod;
+            sol += vol.mod;
+            sor += vor.mod;
+        }
+
+        if (vil.right() !== null && vor.right() === null) {
+            vor.thread = vil.right();
+            vor.mod += sil - sor;
+        } else {
+            if (vir.left !== null && vol.left() === null) {
+                vol.thread = vir.left();
+                vol.mod += sir - sol;
+            }
+            defaultAncestor = v;
+        }
+    }
+    return defaultAncestor;
+}
+
+const moveSubtree = (wl, wr, shift) => {
+    const subtrees = wr.number - wl.number;
+    wr.change -= shift / subtrees;
+    wr.shift += shift;
+    wl.change += shift / subtrees;
+    wr.x += shift;
+    wr.mod += shift;
+}
+
+const executeShifts = v => {
+    let shift = 0;
+    let change = 0;
+    for (let i = v.children.length - 1; i >= 0; i--) {
+        const w = v.children[i];
+        w.x += shift;
+        w.mod += shift;
+        change += w.change;
+        shift += w.shift + change;
+    }
+}
+
+const ancestor = (vil, v, defaultAncestor) =>
+    v.parent.children.includes(vil.ancestor)
+        ? vil.ancestor
+        : defaultAncestor;
+
+const secondWalk = (v, m=0, depth=0, min=null) => {
+    v.x += m;
+    v.y = depth;
+
+    if (min === null || v.x < min) {
+        min = v.x;
+    }
+
+    for (const w of v.children) {
+        min = secondWalk(w, m + v.mod, depth+1, min);
+    }
+
+    return min;
+}
+
+const thirdWalk = (tree, n) => {
+    tree.x += n;
+    for (const c of tree.children) {
+        thirdWalk(c, n);
+    }
+}
+
+const buchheim = tree => {
+    const drawTree = new DrawTree(tree);
+    const dt = firstWalk(drawTree);
+    const min = secondWalk(dt);
+    if (min < 0) {
+        thirdWalk(dt, -min);
+    }
+    return dt;
+}
+
+const makeElement = (name) => document.createElementNS(SVG_NAMESPACE, name);
+
+const pointSvg = (x, y) => {
+    const point = makeElement("circle");
+    point.setAttribute("r", `${0.2}`); // todo: decide
+    point.setAttribute("cx", `${x}`);
+    point.setAttribute("cy", `${y}`);
+    point.setAttribute("stroke", "#000000");
+    point.setAttribute("stroke-width", "0.05");
+    point.setAttribute("fill", "#FFFFFF");
+    return point;
+}
+
+const squareSvg = (x, y) => {
+    const point = makeElement("rect");
+    point.setAttribute("x", `${x-0.2}`);
+    point.setAttribute("y", `${y-0.2}`);
+    point.setAttribute("width", `${0.4}`);
+    point.setAttribute("height", `${0.4}`);
+    point.setAttribute("rx", `${0.05}`);
+    point.setAttribute("stroke", "#000000");
+    point.setAttribute("stroke-width", "0.05");
+    point.setAttribute("fill", "#FFFFFF");
+    return point;
+}
+
+const lineSvg = (x1, y1, x2, y2) => {
+    const line = makeElement("line");
+    line.setAttribute("x1", `${x1}`);
+    line.setAttribute("y1", `${y1}`);
+    line.setAttribute("x2", `${x2}`);
+    line.setAttribute("y2", `${y2}`);
+    line.setAttribute("stroke-width", "0.05");
+    line.setAttribute("stroke", "#000000");
+    return line;
+}
+
+const drawTreeToSvg = (drawTree, square=false) => {
+    const svg = makeElement("svg");
+    svg.setAttribute("width", `100%`);
+    svg.setAttribute("height", `300px`);
+    let lowerX = null; let upperX = null; let lowerY = null; let upperY = null;
+    const lineGroup = makeElement("g");
+    svg.appendChild(lineGroup);
+    const pointGroup = makeElement("g");
+    svg.appendChild(pointGroup);
+    const queue = new Queue([drawTree]);
+    while (queue.size() > 0) {
+        const nextTree = queue.pop();
+        const x1 = nextTree.x; const y1 = nextTree.y;
+        lowerX = lowerX === null ? x1 : Math.min(lowerX, x1);
+        upperX = upperX === null ? x1 : Math.max(upperX, x1);
+        lowerY = lowerY === null ? y1 : Math.min(lowerX, y1);
+        upperY = upperY === null ? y1 : Math.max(upperY, y1);
+        const point = (square ? squareSvg : pointSvg)(x1, y1);
+        pointGroup.appendChild(point);
+
+        let subTreeLevel = null;
+        let avg = null;
+        let minXAmongChildren = null;
+        let maxXAmongChildren = null;
+        for (const subTree of nextTree.children) {
+            const [sX, sY] = [subTree.x, subTree.y];
+            if (subTreeLevel === null) {
+                subTreeLevel = sY;
+                avg = (y1+sY)/2;
+            }
+            minXAmongChildren = minXAmongChildren === null
+                ? sX : Math.min(minXAmongChildren, sX);
+            maxXAmongChildren = maxXAmongChildren === null
+                ? sX : Math.max(maxXAmongChildren, sX);
+
+            const [lx1, ly1, lx2, ly2] = square
+                ? [sX, avg, sX, sY]
+                : [x1, y1, sX, sY];
+            const line = lineSvg(lx1, ly1, lx2, ly2);
+            lineGroup.appendChild(line);
+
+            queue.push(subTree);
+        }
+        console.log(square, subTreeLevel, avg, minXAmongChildren, maxXAmongChildren);
+
+        if (square && nextTree.children.length > 0) {
+            lineGroup.appendChild(lineSvg(
+                x1, y1, x1, avg,
+            ));
+            lineGroup.appendChild(lineSvg(
+                minXAmongChildren, avg, maxXAmongChildren, avg,
+            ));
+        }
+    }
+
+    // one is null iff the others are
+    if (lowerX === null) {
+        lowerX = 0; upperX = 0; lowerY = 0; upperY = 0;
+    } else {
+        // boundaries
+        lowerX -= 1; lowerY -= 1; upperX += 1; upperY += 1;
+    }
+    svg.setAttribute("viewBox", `${lowerX} ${lowerY} ${upperX-lowerX} ${upperY-lowerY}`);
+    return svg;
+}
+
+
+const testTree = new Tree([
+    new Tree([
+        new Tree([]),
+        new Tree([]),
+    ]),
+    new Tree([
+        new Tree([
+            new Tree([]),
+        new Tree([
+            new Tree([]),
+            new Tree([]),
+        ]),
+        new Tree([]),
+        ]),
+        new Tree([]),
+        new Tree([
+            new Tree([]),
+            new Tree([]),
+        ]),
+    ]),
+    new Tree([
+        new Tree([]),
+        new Tree([]),
+        new Tree([]),
+        new Tree([
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+        ]),
+        new Tree([]),
+    ]),
+]);
+const testTree2 = new Tree([
+    new Tree([
+        new Tree([]),
+        new Tree([]),
+        new Tree([]),
+        new Tree([]),
+        new Tree([]),
+        new Tree([]),
+        new Tree([
+            new Tree([]),
+        ]),
+    ]),
+    new Tree([]),
+    new Tree([]),
+    new Tree([
+        new Tree([]),
+    ]),
+    new Tree([]),
+    new Tree([
+        new Tree([
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+            new Tree([]),
+        ]),
+    ]),
+]);
+const uglyTree = new Tree([
+    new Tree([]),
+    new Tree([
+        new Tree([
+            new Tree([
+                new Tree([]),
+                new Tree([
+                    new Tree([]),
+                ]),
+            ]),
+            new Tree([
+                new Tree([
+                    new Tree([]),
+                ]),
+                new Tree([
+                    new Tree([]),
+                    new Tree([]),
+                ]),
+                new Tree([
+                    new Tree([]),
+                    new Tree([]),
+                    new Tree([]),
+                ]),
+            ]),
+            new Tree([
+                new Tree([
+                    new Tree([]),
+                ]),
+                new Tree([
+                    new Tree([]),
+                    new Tree([]),
+                    new Tree([]),
+                ]),
+                new Tree([
+                    new Tree([]),
+                    new Tree([]),
+                ]),
+            ]),
+        ]),
+        new Tree([]),
+        new Tree([
+            new Tree([
+                new Tree([
+                    new Tree([]),
+                    new Tree([]),
+                ]),
+                new Tree([
+                    new Tree([]),
+                ]),
+                new Tree([
+                    new Tree([]),
+                    new Tree([]),
+                    new Tree([]),
+                ]),
+            ]),
+            new Tree([
+                new Tree([]),
+            ]),
+            new Tree([]),
+        ]),
+        new Tree([
+            new Tree([
+                new Tree([]),
+                new Tree([]),
+                new Tree([]),
+            ]),
+        ]),
+    ]),
+    new Tree([]),
+]);
+
+const randomTree = new Tree([]);
+const queue = new Queue([[randomTree, 0]]);
+while (queue.size() > 0) {
+    const [nextTree, depth] = queue.pop();
+    // random number uniformly between 0 and 5. limit depth though.
+    const numChildren = depth == 5 ? 0 : Math.floor(Math.random() * 4);
+    for (let i = 0; i < numChildren; i++) {
+        const child = new Tree([]);
+        nextTree.children.push(child);
+        queue.push([child, depth+1]);
+    }
+}
+console.log(testTree2);
+const aaaaargh = buchheim(testTree);
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+const testSvg = drawTreeToSvg(aaaaargh);
+console.log(aaaaargh);
+const div = document.getElementById("test-tree-location");
+div.appendChild(testSvg);
+
+
+
+const sadTreeDiv = document.getElementById("sad-tree");
+const sadTreeDrawing = buchheim(testTree2);
+sadTreeDiv.appendChild(drawTreeToSvg(sadTreeDrawing));
+
+// hacky
+const fixedSadTreeDrawing = buchheim(testTree2);
+for (const [i, child] of fixedSadTreeDrawing.children.entries()) {
+    child.x = 3+7*i/(fixedSadTreeDrawing.children.length-1);
+}
+fixedSadTreeDrawing.children[3].children[0].x = 3 + 7*3/5;
+const fixedSadTreeDiv = document.getElementById("fixed-sad-tree");
+fixedSadTreeDiv.appendChild(drawTreeToSvg(fixedSadTreeDrawing));
+
+
+const uglyTreeDiv = document.getElementById("ugly-tree");
+const uglyTreeDrawing = buchheim(uglyTree);
+uglyTreeDiv.appendChild(drawTreeToSvg(uglyTreeDrawing));
+
+
+const uglyTreeSquareDiv = document.getElementById("ugly-tree-square");
+uglyTreeSquareDiv.appendChild(drawTreeToSvg(uglyTreeDrawing, true));
+</script>

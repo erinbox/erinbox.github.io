@@ -1,0 +1,37 @@
+---
+title: Fischer timing
+layout: default
+categories: games
+---
+
+<p>Fischer timing is a timing method for games. Each player starts with a certain amount of time. <strong>Before</strong> (not after) every move, their clock is topped up by a fixed amount. Their clock ticks down on their turn and if it hits zero, they lose.</p>
+
+<p>For example, &ldquo;10m+5s&rdquo; means each player's clock starts at 10 minutes and is increased by 5 seconds before each of their moves.</p>
+
+<p>This timing method is universally used when playing chess with a clock. Traditionally Go uses a different timing system called byo-yomi, but it seems like Fischer timing is beginning to be adopted more often.</p>
+
+<p>Byo-yomi is a different timing method for games. Each player starts with a fixed amount of main time and a fixed number of &ldquo;byo-yomi periods&rdquo;, of a given length. When they run out of main time, they are given the length of a period to make a move. If they take longer than one period, that period is permanently lost. TODO better explanation</p>
+
+<p>An advantage of byo-yomi over Fischer timing is that it ensures that moves are made at a regular cadence (at least once the main time is over). The main disadvantage of byo-yomi timing is that it significantly distorts ordinary play as it is advantageous to wait the full period for every move, even if there is only one obvious forced move. Fischer timing does not have this disadvantage, so obvious moves will be played immediately.</p>
+
+<p>If there are \(P\) players each with a main time of \(M\) minutes and increment of \(I\) seconds, then an \(N\)-move game will take at most</p>
+
+\[
+T=PM+\frac{I}{60}\cdot N
+\]
+
+<p>minutes. Assuming a completed 250-move game of Go, we have some typical lengths:</p>
+
+<table>
+  <tr><th>Time control</th><th>Maximum length</th></tr>
+  <tr><td>5m+3s</td><td>22m 30s</td></tr>
+  <tr><td>5m+5s</td><td>30m 50s</td></tr>
+  <tr><td>5m+10s</td><td>51m 40s</td></tr>
+  <tr><td>10m+10s</td><td>1h 1m 40s</td></tr>
+  <tr><td>15m+10s</td><td>1h 11m 40s</td></tr>
+  <tr><td>20m+20s</td><td>1h 1m 40s</td></tr>
+  <tr><td>30m+20s</td><td>2h 23m 20s</td></tr>
+  <tr><td>45m+15s</td><td>2h 32m 30s</td></tr>
+</table>
+
+<p>Assuming a fixed game length, the effect of increasing \(M\) and decreasing \(I\) is to give each player more flexibility with their time, but worse consequences if they mismanage it. In the extreme case when \(I=0\), each player has full control over their time, but risk having to make an unrealistic number of moves in the amount of time they've left themselves. No increment does not work too well for Go due to the large amount of pointless moves a losing player can make to &ldquo;flag&rdquo; their opponent (many more than are needed in chess to checkmate an opponent).</p>

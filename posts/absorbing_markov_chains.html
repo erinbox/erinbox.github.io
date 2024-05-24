@@ -1,0 +1,168 @@
+---
+title: Flip a coin until your last 5 flips are HTTTH or HTHTH, then stop. Which was more likely?
+layout: default
+categories: maths
+---
+
+<p>Test.</p>
+
+<div id="word-cage"></div>
+<input type="text"></input>
+
+<div id="results-box">
+  <div id="results-chain-graph">
+
+  </div>
+  <p id="results-transition-matrix">
+  </p>
+  <p id="results-transition-matrix-r">
+  </p>
+  <p id="results-fundamental-matrix">
+  </p>
+  <div>
+
+  </div>
+</div>
+
+
+
+<script src="https://unpkg.com/mathjs/lib/browser/math.js"></script>
+<script>
+const _getAlphabet = (stoppingStates, alphabet) => {
+    const characters = new Set();
+    for (const state of stoppingStates) {
+        for (const c of state) {
+            characters.add(c);
+        }
+    }
+    if (alphabet !== null) {
+        for (const a of alphabet) {
+            characters.add(a);
+        }
+    }
+    return characters;
+}
+
+const _getChainStates = stoppingStates => {
+    const transientStates = new Set();
+    for (const state of stoppingStates) {
+        for (let i = 0; i < state.length; i++) {
+            const strictPrefix = state.substring(0, i);
+            transientStates.add(strictPrefix);
+        }
+    }
+    for (const state of stoppingStates) {
+        transientStates.delete(state);
+    }
+    const allStates = _sortStates(Array.from(transientStates))
+        .concat(_sortStates(Array.from(stoppingStates)));
+    const allStatesReverseMap = new Map(allStates.map((s,i) => [s, i]));
+    return [allStates, allStatesReverseMap, transientStates.size];
+}
+
+const _sortStates = states => {
+    return states.toSorted((a,b) => {
+        const lengthComp = a.length - b.length;
+        if (lengthComp !== 0) {
+            return lengthComp;
+        } else {
+            return a < b;
+        }
+    });
+}
+
+const longestSuffixInStates = (s, allStatesReverseMap) => {
+    const L = s.length+1;
+    for (let i = 0; i < L; i++) {
+        const suffix = s.substring(i, L);
+        if (allStatesReverseMap.has(suffix)) {
+            return allStatesReverseMap.get(suffix);
+        }
+    }
+    throw Error("Should be impossible to reach this point---the empty string is always a state for any input and a suffix of every string");
+}
+
+const _buildQAndR = (allStates, allStatesReverseMap, alphabet, t) => {
+    const Q = math.zeros(t, t);
+    const R = math.zeros(t, allStates.length - t);
+    const increment = math.fraction(1, alphabet.size);
+    for (let startIdx = 0; startIdx < t; startIdx++) {
+        for (const c of alphabet) {
+            // start = transient; end = any state
+            const start = allStates[startIdx];
+            const endIdx = longestSuffixInStates(start + c, allStatesReverseMap);
+            if (endIdx < t) {
+                const idx = [startIdx, endIdx];
+                Q.set(idx, math.add(Q.get(idx), increment));
+            } else {
+                const idx = [startIdx, endIdx-t];
+                R.set(idx, math.add(R.get(idx), increment));
+            }
+        }
+    }
+    return [Q, R];
+}
+
+// Takes a set of strings and optional extra alphabet param.
+const stuff = (stoppingStates, alphabet=null) => {
+    // If the empty string is a stopping state, this maths doesn't hold
+    // as the starting state must be a transient state, so just return
+    // the corresponding absorbing state entry.
+    if (stoppingStates.has("")) {
+        return new Map(stoppingStates.keys(s => [s, s == "" ? 1 : 0]));
+    }
+    const alphabet_ = _getAlphabet(stoppingStates, alphabet);
+    const [allStates, allStatesReverseMap, t] = _getChainStates(stoppingStates);
+    const [Q, R] = _buildQAndR(allStates, allStatesReverseMap, alphabet_, t);
+    const N = math.inv(math.subtract(math.identity(t), Q));
+    const B = math.multiply(N,R);
+    const resultMap = new Map();
+    const emptyStringIdx = allStatesReverseMap.get(""); // should always be 0
+    for (let i = t; i < allStates.length; i++) {
+        const s = allStates[i];
+        resultMap.set(s, B.get([emptyStringIdx, i-t]));
+    }
+    return [alphabet, allStates, Q, R, N, B, resultMap];
+}
+
+// 2d matrices containing fractions
+const matrixToLatex = mat => {
+    const [numRows, numCols] = mat.size();
+    const s = ["\\begin{bmatrix} "];
+    for (let x = 0; x < numRows; x++) {
+        for (let y = 0; y < numCols; y++) {
+            const f = mat.get([x, y]);
+            // crap integer check
+            s.push(f.n === undefined ? `${f}` : `\\frac{${f.n}}{${f.d}}`);
+            if (y < numCols - 1) {
+                s.push(" & ");
+            }
+        }
+        if (x < numRows - 1) {
+            s.push(" \\\\ ");
+        }
+    }
+    s.push(" \\end{bmatrix}");
+    return s.join("");
+}
+
+const displayResults = stoppingStates => {
+    const [alphabet, allStates, Q, R, N, B, resultMap] = stuff(stoppingStates);
+    const Qstr = matrixToLatex(Q);
+    const Rstr = matrixToLatex(R);
+    const Nstr = matrixToLatex(N);
+    const resultsDiv = document.getElementById("results-box");
+    const transitionMatrix = document.getElementById("results-transition-matrix");
+    transitionMatrix.innerHTML = "\\(Q = " + Qstr + "\\)";
+    const transitionMatrixR = document.getElementById("results-transition-matrix-r");
+    transitionMatrixR.innerHTML = "\\(R = " + Rstr + "\\)";
+    const fundamentalMatrix = document.getElementById("results-fundamental-matrix");
+    fundamentalMatrix.innerHTML = "\\(N = " + Nstr + "\\)";
+    MathJax.typesetClear([resultsDiv]);
+    MathJax.typesetPromise([resultsDiv]).then(() => {
+    // the new content is has been typeset
+    });
+}
+
+displayResults(new Set(["HTHTH", "HTTTH"]));
+</script>

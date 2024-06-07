@@ -1,0 +1,236 @@
+---
+title: SK Combinators
+layout: default
+categories: games; computer science
+---
+
+<script src="queue.js"></script>
+<script src="drawtree.js"></script>
+
+<script>
+class T extends Tree {
+    print() {}
+
+    left() { return null; }
+    right() { return null; }
+    children() { return []; }
+    toString() {
+        if (this instanceof K_) {
+            return "K";
+        } else if (this instanceof S_) {
+            return "S";
+        } else if (this instanceof B_) {
+            const l = this.left();
+            const r = this.right();
+            const [leftParen, rightParen] = r instanceof B_ ? ["(", ")"] : ["", ""];
+            return `${l}${leftParen}${r}${rightParen}`;
+        } else {
+            throw new Exception();
+        }
+    }
+    _next_toplevel() {
+        if (this instanceof B_) {
+            const l = this.left();
+            if (l instanceof B_) {
+                const ll = l.left();
+                if (ll instanceof K_) {
+                    return [l.right(), "K"];
+                } else if (ll instanceof B_) {
+                    const lll = ll.left();
+                    if (lll instanceof S_) {
+                        const llr = ll.right();
+                        const lr = l.right();
+                        const r = this.right();
+                        return [B(B(llr, r), B(lr, r)), "S"];
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /// returns null or [next_combinator, path[0=<, 1=>], ruleused].
+    next() {
+        const stack = [[this, []]];
+        while (stack.length > 0) {
+            const [node, pathSoFar] = stack.pop();
+            const potentialNext = node._next_toplevel();
+            if (potentialNext !== null) {
+                return [potentialNext[0], pathSoFar, potentialNext[1]];
+            } else if (node instanceof B_) {
+                for (const [child, dir] of [[node.left(), 0], [node.right(), 1]]) {
+                    stack.push([child, pathSoFar.concat([dir])]);
+                }
+            }
+        }
+        return null;
+    }
+}
+
+class S_ extends T {}
+class K_ extends T {}
+class B_ extends T {
+    constructor(t1, t2) {
+        super();
+        this.t1_ = t1;
+        this.t2_ = t2;
+    }
+    left() { return this.t1_; }
+    right() { return this.t2_; }
+    children() { return [this.left(), this.right()]; }
+}
+
+const S = new S_();
+const K = new K_();
+const B = (t1, t2) => new B_(t1, t2);
+const I = B(B(S,K),K);
+
+// Points of the tree. (branches get a point at the intersection of the
+// two branches.) No need to store lines separately because the rules for
+// line transformation are simple: if either end disappears, disappear,
+// otherwise connect the points.
+class NextMap extends Tree {
+    // nextPositions a list of [x,y] pairs
+    // children should be a list of NextMaps
+    constructor(nextPositions, children) {
+        super();
+        this.nextPositions = nextPositions;
+        this._children = children;
+    }
+
+    // from a drawtree
+    static blank(tree) {
+        const nextMapChildren = tree.children().map(c => NextMap.blank(c));
+        return new NextMap([], nextMapChildren);
+    }
+
+    get children() { return this._children; }
+}
+
+/// Given an SK combinator and its corresponding draw tree, return
+/// [
+///     next = comb.next() (might be null),
+///     DrawTree.mk(next) (or null),
+///     transition set of points in the tree (or null).
+/// ]
+const nextWithAllPositions = (comb, drawTree) => {
+    const nextCombResults = comb.next();
+    if (nextCombResults === null) {
+        return null;
+    }
+
+    const [nextComb, pathRuleApplied, ruleApplied] = nextCombResults;
+    const nextDrawTree = DrawTree.mk(nextComb);
+    const transitionMap = NextMap.blank(comb);
+
+    // Iterate in parallel over the trees. The subTransitionMap is based
+    // on the previous tree while the nextDrawTree is based on the new tree.
+    // However, they will only differ in structure in a known way
+    // at the point given by `pathRuleApplied`.
+    const stack = [[
+        nextDrawTree,
+        transitionMap,
+        [],
+    ]];
+    while (stack.length > 0) {
+        const [subDrawTree, subTransitionMap, pathSoFar] = stack.pop();
+        subTransitionMap.nextPositions.push([subDrawTree.x, subDrawTree.y]);
+        if (arrEq(pathSoFar, pathRuleApplied)) {
+            specialRules(subTransitionMap, subDrawTree, ruleApplied);
+        } else {
+            for (const [i, child] of subDrawTree.children.entries()) {
+                stack.push([child, subTransitionMap.children[i], pathSoFar.concat(i)]);
+            }
+        }
+    }
+
+    return transitionMap;
+}
+
+// an array of simple equatable things
+const arrEq = (as, bs) => {
+    if (as.length !== bs.length) {
+        return false;
+    }
+
+    for (const [i, a] of as.entries()) {
+        const b = bs[i];
+        if (a !== b) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// the transition map must also be identical to the drawTrees
+const applyIdenticalTrees = (transitionMap, identicalDrawTrees) => {
+    const stack = [transitionMap, identicalDrawTrees];
+    while (stack.length > 0) {
+        const [tm, dts] = stack.pop();
+        for (const dt of dts) {
+            tm.nextPositions.push([dt.x, dt.y]);
+        }
+        for (const [i, child] of transitionMap.children.entries()) {
+            stackSC.push([child, dts.map(dt => dt.children[i])]);
+        }
+    }
+}
+
+const specialRules = (transitionMap, nextDrawTree, ruleApplied) => {
+    console.log(transitionMap, nextDrawTree, ruleApplied);
+    switch (ruleApplied) {
+        case "K": // Kab -> a
+            // everything disappears except LLR.
+            // by default nextMap disappears things so R is disappeared
+            // and LL (which is just K)
+            // disappear R
+            // move LR to its new position. all LR subtrees are identical
+            applyIdenticalTrees(
+                transitionMap.children[0].children[1],
+                [nextDrawTree],
+            );
+            break;
+        case "S": // Sabc -> ac(bc)
+            // unduplicate this code
+            applyIdenticalTrees(
+                transitionMap.children[0].children[0].children[1],
+                [nextDrawTree.children[0].children[0]],
+            );
+            applyIdenticalTrees(
+                transitionMap.children[0].children[1],
+                [nextDrawTree.children[1].children[0]],
+            );
+            applyIdenticalTrees(
+                transitionMap.children[1],
+                [
+                    nextDrawTree.children[0].children[1],
+                    nextDrawTree.children[1].children[1],
+                ],
+            );
+            break;
+        default:
+            throw `Unrecognised rule ${ruleApplied}; should be "K" or "S"`.
+            break;
+    }
+}
+
+
+const test = B(B(B(S,K),I),B(B(K,I),S));
+let k = test;
+console.log(k.toString());
+while (k !== null) {
+    const nextStuff = k.next();
+    if (nextStuff !== null) {
+        k = nextStuff[0];
+        console.log(k.toString(), nextStuff[1], nextStuff[2]);
+    } else {
+        k = null;
+    }
+}
+
+const drawTest = DrawTree.mk(test);
+console.log(drawTest);
+
+const nextPositions = nextWithAllPositions(test, drawTest);
+console.log(nextPositions);
+</script>
